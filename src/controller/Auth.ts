@@ -40,7 +40,7 @@ export const register = async (req: Request, res: Response): Promise<any> => {
 
         // Hardcoded OTP
         const otp = "123456"; // Hardcoded OTP for simplicity
-        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
+        const otpExpiry = new Date(Date.now() + 1000 * 60 * 1000); // OTP expires in 10 minutes
 
         // Create new user
         await User.create({
