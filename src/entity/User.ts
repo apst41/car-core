@@ -3,35 +3,49 @@ import sequelize from "./Database";
 
 class User extends Model {
     public id!: number;
-    public name!: string;
-    public username!: string;
-    public email!: string;
-    public passwordHash!: string;
+    public mobileNo!: string;
+    public name?: string;
+    public username?: string;
+    public email?: string;
+    public passwordHash?: string;
     public otpCode?: string | null;
     public otpExpiry?: Date | null;
-    public isVerified!: boolean;
+    public isVerified?: boolean;
+    public token?: string | null; // Token field
+    public tokenExpiry?: Date | null; // Token expiry field
 }
 
 User.init(
     {
-        name: {
-            type: DataTypes.STRING,
+        id: {
+            type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey: true,
+            autoIncrement: true,
         },
-        username: {
+        mobileNo: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true,
         },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        username: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
+        },
         email: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
             unique: true,
             validate: { isEmail: true },
         },
         passwordHash: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
         },
         otpCode: {
             type: DataTypes.STRING,
@@ -43,7 +57,18 @@ User.init(
         },
         isVerified: {
             type: DataTypes.BOOLEAN,
+            allowNull: true,
             defaultValue: false,
+        },
+        token: {
+            type: DataTypes.STRING, // Token field
+            allowNull: true,       // Allow null values
+            defaultValue: null,    // Default value is null
+        },
+        tokenExpiry: {
+            type: DataTypes.DATE,  // Token expiry field
+            allowNull: true,       // Allow null values
+            defaultValue: null,    // Default value is null
         },
     },
     {

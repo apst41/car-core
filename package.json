@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts",
+    "dev": "concurrently \"tsc --watch\" \"node dist/server.js\"",
     "build": "tsc"
   },
   "keywords": [],
@@ -33,6 +33,6 @@
     "@types/sequelize": "^4.28.20",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.3"
   }
 }

@@ -1,23 +1,42 @@
-import  { Request, Response } from "express";
+import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import User from "../entity/User";
-import {Op} from "sequelize"; // Import your user model
+import { Op } from "sequelize"; // Import your user model
 import jwt from 'jsonwebtoken';
 
 export const register = async (req: Request, res: Response): Promise<any> => {
-    const {name, username, email, password} = req.body;
+    const { name, username, email, password, mobileNo } = req.body;
+
+    if (!mobileNo) {
+        return res.status(400).json({ message: "Mobile number is required" });
+    }
 
     try {
-        // Check if user already exists by email or username
-        const existingUser = await User.findOne({where: {email}});
-        const existingUsername = await User.findOne({where: {username}});
+        // Check if user already exists by email, username, or mobileNo
+        if (email) {
+            const existingUser = await User.findOne({ where: { email } });
+            if (existingUser) {
+                return res.status(400).json({ message: "Email already in use" });
+            }
+        }
 
-        if (existingUser || existingUsername) {
-            return res.status(400).json({message: "Email or Username already in use"});
+        if (username) {
+            const existingUsername = await User.findOne({ where: { username } });
+            if (existingUsername) {
+                return res.status(400).json({ message: "Username already in use" });
+            }
+        }
+
+        const existingMobileNo = await User.findOne({ where: { mobileNo } });
+        if (existingMobileNo) {
+            return res.status(400).json({ message: "Mobile number already in use" });
         }
 
         // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        let hashedPassword = null;
+        if (password) {
+            hashedPassword = await bcrypt.hash(password, 10);
+        }
 
         // Hardcoded OTP
         const otp = "123456"; // Hardcoded OTP for simplicity
@@ -28,7 +47,8 @@ export const register = async (req: Request, res: Response): Promise<any> => {
             name,
             username,
             email,
-            passwordHash: hashedPassword,
+            passwordHash: hashedPassword, // Can be null if password is not provided
+            mobileNo, // Include mobileNo in the user creation
             otpCode: otp,
             otpExpiry,
         });
@@ -41,15 +61,14 @@ export const register = async (req: Request, res: Response): Promise<any> => {
         //     text: `Your OTP code is ${otp}. It will expire in 10 minutes.`,
         // });
 
-        res.status(200).json({message: "Registration successful. OTP sent to your email."});
+        return res.status(200).json({ message: "Registration successful. OTP sent to your email." });
     } catch (error) {
         console.error(error);
-        res.status(500).json({message: "Internal server error"});
+        return res.status(500).json({ message: "Internal server error" });
     }
-    res.status(200).json({message: 'Hello from Example API!'});
 };
 
-export const verifyOtp  = async (req: Request, res: Response): Promise<any> => {
+export const verifyOtp = async (req: Request, res: Response): Promise<any> => {
     const { email, otp }: { email: string, otp: string } = req.body;
 
     try {
@@ -67,8 +86,7 @@ export const verifyOtp  = async (req: Request, res: Response): Promise<any> => {
 
         // Check if OTP has expired
         const now = new Date();
-        // @ts-ignore
-        if (user.otpExpiry < now) {
+        if (user.otpExpiry && user.otpExpiry < now) {
             return res.status(400).json({ message: 'OTP has expired' });
         }
 
@@ -84,39 +102,48 @@ export const verifyOtp  = async (req: Request, res: Response): Promise<any> => {
         console.error(error);
         return res.status(500).json({ message: 'Internal server error' });
     }
-
-    res.status(200).json({message: 'Hello from Example API!'});
 };
 
-
 export const login = async (req: Request, res: Response): Promise<any> => {
-    const { email, password }: { email: string, password: string } = req.body;
+    const { mobileNo, otpCode }: { mobileNo: string; otpCode: string } = req.body;
+
 
     try {
         // Find the user by email or username (you can modify this to support both)
         const user = await User.findOne({
             where: {
-                [Op.or]: [{ email }, { username: email }] // Allow login via email or username
+                mobileNo: mobileNo // Search by mobile number
             }
         });
 
-        if (!user) {
+        if (!user || user.otpCode !== otpCode) {
             return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        const currentTime = new Date();
+        if (user.otpExpiry && currentTime > user.otpExpiry) {
+         return res.status(400).json({ message: "OTP has expired" });
         }
 
         // Compare entered password with the stored hash
-        const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+       
 
-        if (!isPasswordValid) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
+       
 
         // Create a JWT token (you can adjust the payload as needed)
         const token = jwt.sign(
-            { userId: user.id, email: user.email },
+            { mobileNO: user.mobileNo },
             process.env.JWT_SECRET || 'your_secret_key', // Use a secret key for signing the token
-            { expiresIn: '1h' } // Token expiry time (e.g., 1 hour)
+            { expiresIn: '1000h' } // Token expiry time (e.g., 1 hour)
         );
+
+
+        await user.update({
+            otpCode: null,
+            otpExpiry: null,
+            token: token, // Save the token in the database
+            tokenExpiry: new Date(Date.now() + 1000 * 60 * 60) // Set token expiry time (e.g., 1 hour)
+        });
 
         // Send the response with the token
         return res.status(200).json({
