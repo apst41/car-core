@@ -27,10 +27,23 @@ export const register = async (req: Request, res: Response): Promise<any> => {
             }
         }
 
-        const existingMobileNo = await User.findOne({ where: { mobileNo } });
-        if (existingMobileNo) {
-            return res.status(400).json({ message: "Mobile number already in use" });
+        const user = await User.findOne({ where: { mobileNo } });
+        if (user?.mobileNo) {
+            const otpCode = getOtp();
+            const otpExpiry = new Date(Date.now() + 1000 * 60 * 10); // OTP expires in 10 minutes
+        
+       
+        await user.update({
+            otpCode: otpCode,
+            otpExpiry: otpExpiry
+        });
+
+         //send otp in future
+
+        return res.status(200).json({ message: 'OTP sent successfully' });
         }
+       
+
 
         // Hash password
         let hashedPassword = null;
@@ -68,43 +81,82 @@ export const register = async (req: Request, res: Response): Promise<any> => {
     }
 };
 
-export const verifyOtp = async (req: Request, res: Response): Promise<any> => {
-    const { email, otp }: { email: string, otp: string } = req.body;
+// export const verifyOtp = async (req: Request, res: Response): Promise<any> => {
+//     const { email, otp }: { email: string, otp: string } = req.body;
+
+//     try {
+//         // Check if the user exists by email
+//         const user = await User.findOne({ where: { email } });
+
+//         if (!user) {
+//             return res.status(400).json({ message: 'User not found' });
+//         }
+
+//         // Check if OTP exists and is correct
+//         if (user.otpCode !== otp) {
+//             return res.status(400).json({ message: 'Invalid OTP' });
+//         }
+
+//         // Check if OTP has expired
+//         const now = new Date();
+//         if (user.otpExpiry && user.otpExpiry < now) {
+//             return res.status(400).json({ message: 'OTP has expired' });
+//         }
+
+//         // OTP is valid and not expired, proceed with your logic (e.g., update user status, etc.)
+//         // Optionally, clear OTP from the database after successful verification
+//         user.otpCode = null;
+//         user.otpExpiry = null;
+//         user.isVerified = true;
+//         await user.save();
+
+//         return res.status(200).json({ message: 'OTP verified successfully' });
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).json({ message: 'Internal server error' });
+//     }
+// };
+
+export const sendOtp = async (req: Request, res: Response): Promise<any> => {
+    const { mobileNo }: { mobileNo: string} = req.body;
+
 
     try {
-        // Check if the user exists by email
-        const user = await User.findOne({ where: { email } });
+        // Find the user by email or username (you can modify this to support both)
+        const user = await User.findOne({
+            where: {
+                mobileNo: mobileNo // Search by mobile number
+            }
+        });
 
         if (!user) {
-            return res.status(400).json({ message: 'User not found' });
+            return res.status(400).json({ message: 'Mobile No does not exists' });
         }
 
-        // Check if OTP exists and is correct
-        if (user.otpCode !== otp) {
-            return res.status(400).json({ message: 'Invalid OTP' });
-        }
-
-        // Check if OTP has expired
-        const now = new Date();
-        if (user.otpExpiry && user.otpExpiry < now) {
-            return res.status(400).json({ message: 'OTP has expired' });
-        }
-
-        // OTP is valid and not expired, proceed with your logic (e.g., update user status, etc.)
-        // Optionally, clear OTP from the database after successful verification
-        user.otpCode = null;
-        user.otpExpiry = null;
-        user.isVerified = true;
-        await user.save();
-
-        return res.status(200).json({ message: 'OTP verified successfully' });
+        // Generate a random 6-digit OTP
+        const otpCode = getOtp();
+        const otpExpiry = new Date(Date.now() + 1000 * 60 * 10); // OTP expires in 10 minutes
+        
+        // Update the user's OTP code and expiry time
+        await user.update({
+            otpCode: otpCode,
+            otpExpiry: otpExpiry
+        });
+        
+        // Send the OTP to the user's mobile number (using hardcoded OTP)
+        // await sendOtpToMobile(otpCode, mobileNo);
+        
+        return res.status(200).json({ message: 'OTP sent successfully' });
+       
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
 
-export const login = async (req: Request, res: Response): Promise<any> => {
+
+
+export const verifyotp = async (req: Request, res: Response): Promise<any> => {
     const { mobileNo, otpCode }: { mobileNo: string; otpCode: string } = req.body;
 
 
@@ -155,3 +207,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+function getOtp() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
