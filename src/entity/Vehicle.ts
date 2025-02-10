@@ -1,13 +1,13 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "./Database";
-class Car extends Model {
+class Vehicle extends Model {
     public id!: number;
     public manufacturer!: string;
     public model!: string;
     public type!: string;
 }
 
-Car.init(
+Vehicle.init(
     {
         id: {
             type: DataTypes.INTEGER,
@@ -30,9 +30,9 @@ Car.init(
     },
     {
         sequelize,
-        tableName: "cars",
+        tableName: "vehicle",
         timestamps: false,
     }
 );
 
-export default Car;
+export default Vehicle;

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import Car from "../entity/Car";
+import Car from "../entity/Vehicle";
+import Vehicle from "../entity/Vehicle";
 
 export const getCities = async (req: Request, res: Response): Promise<any> => {
 
@@ -11,11 +12,11 @@ export const getCities = async (req: Request, res: Response): Promise<any> => {
 
     try {
         
-        const car = await Car.findOne({ where: { model } });
+        const car = await Vehicle.findOne({ where: { model } });
         if (car) {
             return res.status(200).json(car);
         } else {
-            await Car.create({ manufacturer, model, type });
+            await Vehicle.create({ manufacturer, model, type });
             return res.status(201).json({ message: "Car created" });
         }
 
