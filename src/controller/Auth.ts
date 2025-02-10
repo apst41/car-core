@@ -200,7 +200,8 @@ export const verifyotp = async (req: Request, res: Response): Promise<any> => {
         // Send the response with the token
         return res.status(200).json({
             message: 'Login successful',
-            token: token
+            token: token,
+            user_id: user.id
         });
     } catch (error) {
         console.error(error);
@@ -209,5 +210,33 @@ export const verifyotp = async (req: Request, res: Response): Promise<any> => {
 };
 
 function getOtp() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    return "123456";
+    //return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+
+ export const fetchTokenDetails = async (req: Request, res: Response): Promise<any> => {
+
+    const { token }: { token: string} = req.body;
+
+    if(!token){
+        return res.status(400).json({ message: 'Token is  required' });
+    }
+
+    const user = await User.findOne({
+        where: {
+            token: token
+        }
+    });
+
+    if(!user){
+        return res.status(400).json({ message: 'Invalid token' });
+    }
+
+    if(user.tokenExpiry && new Date() > user.tokenExpiry){
+        return res.status(400).json({ message: 'Token expired' });
+    }
+
+    return res.status(200).json({ message: 'Token is valid' });
+
+ }

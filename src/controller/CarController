@@ -1,0 +1,28 @@
+import { Request, Response } from "express";
+import Car from "../entity/Car";
+
+export const getCities = async (req: Request, res: Response): Promise<any> => {
+
+    const {manufacturer,model,type} = req.body;
+
+    if (manufacturer === undefined || model === undefined || type === undefined) {
+        return res.status(400).json({ message: "Bad request" });
+    }
+
+    try {
+        
+        const car = await Car.findOne({ where: { model } });
+        if (car) {
+            return res.status(200).json(car);
+        } else {
+            await Car.create({ manufacturer, model, type });
+            return res.status(201).json({ message: "Car created" });
+        }
+
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+    
+};
