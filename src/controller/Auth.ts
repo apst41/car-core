@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import User from "../entity/User";
-import { Op } from "sequelize"; // Import your user model
 import jwt from 'jsonwebtoken';
 
 export const register = async (req: Request, res: Response): Promise<any> => {

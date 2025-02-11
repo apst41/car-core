@@ -26,8 +26,7 @@ Cities.init(
     },
     {
         sequelize,
-        tableName: "cities",
-        timestamps: false,
+        tableName: "cities"
     }
 );
 

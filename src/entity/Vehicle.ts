@@ -14,7 +14,7 @@ Vehicle.init(
             allowNull: false,
             primaryKey: true,
             autoIncrement: true,
-        },
+    },
         manufacturer: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -30,8 +30,7 @@ Vehicle.init(
     },
     {
         sequelize,
-        tableName: "vehicle",
-        timestamps: false,
+        tableName: "vehicle"
     }
 );
 
