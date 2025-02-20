@@ -21,6 +21,7 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.5",
+    "node-cache": "^5.1.2",
     "pg": "^8.13.1",
     "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.5",

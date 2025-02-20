@@ -3,25 +3,24 @@ import User from "../entity/User";
 
 export const getUserDetails = async (req: Request, res: Response): Promise<any> => {
 
-    const { userId } = req.params;
+    const { id } = req.params;
     
-    if (!userId) {
+    if (!id) {
         return res.status(400).json({ message: "userId is required" });
     }
 
     try {
-    
-        const id = userId
 
         const user = await User.findOne({ where: { id } });
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        return res.status(200).json({ 
+        return res.status(200).json({
+            id:user.id,
             name: user.name,
             email: user.email,
-            matchMedia: user.mobileNo,
+            mobileNo: user.mobileNo,
          });
     } catch (error) {
         console.error(error);

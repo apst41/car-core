@@ -5,6 +5,8 @@ class Vehicle extends Model {
     public manufacturer!: string;
     public model!: string;
     public type!: string;
+    public manufacturerImage?: string;
+    public modelImage?: string;
 }
 
 Vehicle.init(
