@@ -3,7 +3,7 @@ import User from "../entity/User";
 
 export const getUserDetails = async (req: Request, res: Response): Promise<any> => {
 
-    const { id } = req.params;
+    const id = (req as any).user.id;
     
     if (!id) {
         return res.status(400).json({ message: "userId is required" });
