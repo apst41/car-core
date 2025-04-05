@@ -11,8 +11,8 @@ class User extends Model {
     public otpCode?: string | null;
     public otpExpiry?: Date | null;
     public isVerified?: boolean;
-    public token?: string | null; // Token field
-    public tokenExpiry?: Date | null; // Token expiry field
+    public token?: string | null;
+    public tokenExpiry?: Date | null;
 }
 
 User.init(
@@ -26,7 +26,6 @@ User.init(
         mobileNo: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
         },
         name: {
             type: DataTypes.STRING,
@@ -35,12 +34,10 @@ User.init(
         username: {
             type: DataTypes.STRING,
             allowNull: true,
-            unique: true,
         },
         email: {
             type: DataTypes.STRING,
             allowNull: true,
-            unique: true,
             validate: { isEmail: true },
         },
         passwordHash: {
@@ -61,14 +58,14 @@ User.init(
             defaultValue: false,
         },
         token: {
-            type: DataTypes.STRING, // Token field
-            allowNull: true,       // Allow null values
-            defaultValue: null,    // Default value is null
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: null,
         },
         tokenExpiry: {
-            type: DataTypes.DATE,  // Token expiry field
-            allowNull: true,       // Allow null values
-            defaultValue: null,    // Default value is null
+            type: DataTypes.DATE,
+            allowNull: true,
+            defaultValue: null,
         },
     },
     {

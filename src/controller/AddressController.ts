@@ -6,9 +6,6 @@ export const addAddress = async (req: Request, res: Response): Promise<any> => {
     try {
         const { latitude, longitude, tag, addressText } = req.body;
 
-        console.log(req.body);
-        console.log(req.params);
-
         const userId = (req as any).user.id; // Ensure TypeScript recognizes `req.user`
 
         if (!userId || !addressText) {
@@ -66,6 +63,28 @@ export const updateAddress = async (req: Request, res: Response): Promise<any> =
         return res.status(200).json(address);
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const getUserAddresses = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const userId = (req as any).user.id;
+
+        if (!userId) {
+            return res.status(400).json({ message: "userId is required" });
+        }
+
+        // Fetch all addresses for the user
+        const addresses = await UserAddress.findAll({ where: { userId } });
+
+        if (!addresses.length) {
+            return res.status(404).json({ message: "No addresses found for this user" });
+        }
+
+        return res.status(200).json(addresses);
+    } catch (error) {
+        console.error("Error fetching user addresses:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };

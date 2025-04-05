@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "car",
+    "password": "Oneplus@197",
+    "database": "car",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "car",
+    "password": "Oneplus@197",
+    "database": "car",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "car",
+    "password": "Oneplus@197",
+    "database": "car",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

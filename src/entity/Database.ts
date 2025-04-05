@@ -1,7 +1,5 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
-import Cities from "./Cities";
-
 
 dotenv.config();
 
@@ -22,12 +20,11 @@ const sequelize = new Sequelize(
 (async () => {
     try {
         await sequelize.authenticate();
-        console.log("Database connected successfully!");
-        await sequelize.sync({ alter: true }); // Sync models
-        console.log("Database synchronized successfully!");
+        console.log("✅ Database connected successfully!");
+        await sequelize.sync({ alter: true });
+        console.log("✅ Migrations applied successfully!");
     } catch (error) {
-        console.error("Failed to connect or synchronize:", error);
+        console.error("❌ Failed to connect or apply migrations:", error);
     }
 })();
-
 export default sequelize;
