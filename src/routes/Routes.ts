@@ -6,6 +6,7 @@ import {getUserDetails} from "../controller/UserDetails";
 import {authenticateToken} from "../controller/middleware/AuthMiddleware";
 import {addAddress, deleteAddress, getUserAddresses, updateAddress} from "../controller/AddressController";
 import {getAllServices, getPopularServices, getServiceById} from "../controller/ServicesController";
+import { getAvailableSlots} from "../controller/SlotController";
 
 const router = Router();
 
@@ -21,6 +22,7 @@ router.get("/getAddress",authenticateToken,getUserAddresses)
 router.get("/services",authenticateToken,getAllServices)
 router.get("/service-details/:id",authenticateToken,getServiceById)
 router.get("/popular-services",authenticateToken,getPopularServices)
+router.get("/time-slot",authenticateToken,getAvailableSlots)
 
 
 
