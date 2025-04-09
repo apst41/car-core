@@ -32,7 +32,7 @@ export const getServiceById = async (req: Request, res: Response): Promise<any> 
 
 export const getPopularServices = async (req: Request, res: Response): Promise<any> => {
     try {
-        const service = await Services.findOne({where: {isPopular: true}});
+        const service = await Services.findAll({where: {isPopular: true}});
         if (!service) {
             return res.status(404).json({ message: "Service not found" });
         }
