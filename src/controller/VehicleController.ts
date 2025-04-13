@@ -1,29 +1,51 @@
 import { Request, Response } from "express";
-import Car from "../entity/Vehicle";
-import Vehicle from "../entity/Vehicle";
+import Vehicle from "../entity/Vehicle";  // Import your Vehicle model
 
-export const getCities = async (req: Request, res: Response): Promise<any> => {
+export const addBackendVehicle = async (req: Request, res: Response): Promise<any> => {
+    const { manufacturer, model, type, manufacturerImage, modelImage } = req.body;
 
-    const {manufacturer,model,type} = req.body;
-
-    if (manufacturer === undefined || model === undefined || type === undefined) {
-        return res.status(400).json({ message: "Bad request" });
+    // Validate required fields
+    if (!manufacturer || !model || !type) {
+        return res.status(400).json({ message: "Manufacturer, model, and type are required" });
     }
 
     try {
-        
-        const car = await Vehicle.findOne({ where: { model } });
-        if (car) {
-            return res.status(200).json(car);
-        } else {
-            await Vehicle.create({ manufacturer, model, type });
-            return res.status(201).json({ message: "Car created" });
-        }
+        // Create a new Vehicle instance
+        const newVehicle = await Vehicle.create({
+            manufacturer,
+            model,
+            type,
+            manufacturerImage,  // Optional
+            modelImage,          // Optional
+        });
 
-
+        // Return success message with the newly created vehicle
+        return res.status(201).json({
+            message: "Vehicle added successfully",
+            data: newVehicle,
+        });
     } catch (error) {
-        console.error(error);
+        console.error("Error adding vehicle:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
-    
+};
+
+export const getAllVehicles = async (req: Request, res: Response): Promise<any> => {
+    try {
+        // Fetch all vehicles from the database
+        const vehicles = await Vehicle.findAll();
+
+        if (!vehicles || vehicles.length === 0) {
+            return res.status(404).json({ message: "No vehicles found" });
+        }
+
+        // Return the list of vehicles
+        return res.status(200).json({
+            message: "Vehicles fetched successfully",
+            data: vehicles,
+        });
+    } catch (error) {
+        console.error("Error fetching vehicles:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
 };

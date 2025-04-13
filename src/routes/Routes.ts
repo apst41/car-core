@@ -7,6 +7,13 @@ import {authenticateToken} from "../controller/middleware/AuthMiddleware";
 import {addAddress, deleteAddress, getUserAddresses, updateAddress} from "../controller/AddressController";
 import {getAllServices, getPopularServices, getServiceById} from "../controller/ServicesController";
 import { getAvailableSlots} from "../controller/SlotController";
+import {
+    addVehicle, deleteUserVehicle,
+    getUserVehicleById,
+    getUserVehicles,
+    updateVehicleSelection
+} from "../controller/UserVehicleController";
+import {addBackendVehicle, getAllVehicles} from "../controller/VehicleController";
 
 const router = Router();
 
@@ -23,6 +30,15 @@ router.get("/services",authenticateToken,getAllServices)
 router.get("/service-details/:id",authenticateToken,getServiceById)
 router.get("/popular-services",authenticateToken,getPopularServices)
 router.get("/time-slot",authenticateToken,getAvailableSlots)
+router.post("/user-vehicle",authenticateToken,addVehicle)
+router.get("/user-vehicle",authenticateToken,getUserVehicles)
+router.get("/user-vehicle/:id",authenticateToken,getUserVehicleById)
+router.get("/user-vehicle/:id/update-selection",authenticateToken,updateVehicleSelection)
+router.delete("/user-vehicle/:id",authenticateToken,deleteUserVehicle)
+router.post("/backend-vehicle",addBackendVehicle)
+router.get("/backend-vehicle",getAllVehicles)
+
+
 
 
 

@@ -6,7 +6,7 @@ class ServiceDetails extends Model {
     public serviceId!: string;
     public name!: string;
     public price!: number;
-    public discountedPrice!: number;
+    public discount!: number;
     public durationMinutes!: number;
     public videos!: string[];
     public serviceInclusions!: {
