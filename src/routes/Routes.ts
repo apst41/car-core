@@ -14,6 +14,7 @@ import {
     updateVehicleSelection
 } from "../controller/UserVehicleController";
 import {addBackendVehicle, getAllVehicles} from "../controller/VehicleController";
+import {createBooking} from "../controller/BookingController";
 
 const router = Router();
 
@@ -37,6 +38,7 @@ router.get("/user-vehicle/:id/update-selection",authenticateToken,updateVehicleS
 router.delete("/user-vehicle/:id",authenticateToken,deleteUserVehicle)
 router.post("/backend-vehicle",addBackendVehicle)
 router.get("/backend-vehicle",getAllVehicles)
+router.post("/booking",authenticateToken,createBooking)
 
 
 

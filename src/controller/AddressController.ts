@@ -4,15 +4,15 @@ import UserAddress from "../entity/UserAddress";
 // Add Address
 export const addAddress = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { latitude, longitude, tag, addressText } = req.body;
+        const { latitude, longitude, tag, addressText,city,pincode } = req.body;
 
         const userId = (req as any).user.id; // Ensure TypeScript recognizes `req.user`
 
-        if (!userId || !addressText) {
-            return res.status(400).json({ message: "userId and addressText are required" });
+        if (!userId || !addressText || !city || !pincode) {
+            return res.status(400).json({ message: "userId , addressText , city and pincode are required" });
         }
 
-        const address = await UserAddress.create({ userId, latitude, longitude, tag, addressText });
+        const address = await UserAddress.create({ userId, latitude, longitude, tag, addressText,city,pincode });
         return res.status(201).json(address);
     } catch (error) {
         console.error(error);
@@ -46,7 +46,7 @@ export const deleteAddress = async (req: Request, res: Response): Promise<any> =
 export const updateAddress = async (req: Request, res: Response): Promise<any> => {
     try {
         const { addressId } = req.params; // Get Address ID from path
-        const { latitude, longitude, tag, addressText } = req.body;
+        const { latitude, longitude, tag, addressText,city,pincode } = req.body;
 
         if (!addressId) {
             return res.status(400).json({ message: "Address ID is required" });
@@ -58,7 +58,7 @@ export const updateAddress = async (req: Request, res: Response): Promise<any> =
             return res.status(404).json({ message: "Address not found" });
         }
 
-        await address.update({ latitude, longitude, tag, addressText });
+        await address.update({ latitude, longitude, tag, addressText,city,pincode });
 
         return res.status(200).json(address);
     } catch (error) {
