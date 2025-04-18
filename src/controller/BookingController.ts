@@ -4,6 +4,7 @@ import Booking from "../entity/Booking";
 import Slot from "../entity/Slot";
 import UserAddress from "../entity/UserAddress";
 import UserVehicle from "../entity/UserVehicle";
+import ServiceDetails from "../entity/ServiceDetails"; // Assuming this is your service details entity
 import sequelize from "../entity/Database";
 
 export const createBooking = async (req: Request, res: Response): Promise<any> => {
@@ -30,15 +31,16 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
             return res.status(400).json({ message: "Invalid addressId for the user" });
         }
 
+        const city = userAddress.city; // Get the city from user address
+
         // Validate if the provided userVehicleId exists for the user
         const userVehicle = await UserVehicle.findOne({ where: { id: userVehicleId, userId }, transaction });
         if (!userVehicle) {
             return res.status(400).json({ message: "Invalid userVehicleId for the user" });
         }
 
-        // First, reduce the slotCount by 1
+        // Fetch the slot and validate if it exists and if there are available slots
         const slot = await Slot.findOne({ where: { id: slotId }, transaction });
-
         if (!slot) {
             return res.status(400).json({ message: "Slot not found" });
         }
@@ -51,7 +53,21 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
         slot.slotCount -= 1;
         await slot.save({ transaction }); // Save the updated slot count
 
-        // Now, create the booking
+        // Fetch the service details to calculate the final amount
+        const serviceDetails = await ServiceDetails.findOne({
+            where: { id: serviceDetailsId },
+            transaction,
+        });
+
+        if (!serviceDetails) {
+            return res.status(400).json({ message: "Invalid serviceDetailsId" });
+        }
+
+        const price = serviceDetails.price || 0;
+        const discount = serviceDetails.discount || 0;
+        const finalAmount = price - discount; // Calculate the final amount after discount
+
+        // Now, create the booking entry
         const booking = await Booking.create(
             {
                 userId,
@@ -61,6 +77,10 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
                 slotId,
                 status: status || "PENDING", // Default to "PENDING"
                 notes: notes || "", // Default to empty string if no notes
+                city,
+                price,
+                discount,
+                finalAmount,
             },
             { transaction } // Include transaction here for atomicity
         );
