@@ -5,8 +5,8 @@
   "main": "Server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node dist/server.js",
-    "dev": "concurrently \"tsc --watch\" \"node dist/server.js\"",
+    "start": "node dist/Server.js",
+    "dev": "concurrently \"tsc --watch\" \"node dist/Server.js\"",
     "build": "tsc"
   },
   "keywords": [],
