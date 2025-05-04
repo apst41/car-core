@@ -55,6 +55,7 @@ ServiceDetails.init(
     {
         sequelize,
         tableName: "service_details",
+        timestamps: true,
     }
 );
 

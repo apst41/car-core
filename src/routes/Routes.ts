@@ -34,14 +34,9 @@ router.get("/time-slot",authenticateToken,getAvailableSlots)
 router.post("/user-vehicle",authenticateToken,addVehicle)
 router.get("/user-vehicle",authenticateToken,getUserVehicles)
 router.get("/user-vehicle/:id",authenticateToken,getUserVehicleById)
-router.get("/user-vehicle/:id/update-selection",authenticateToken,updateVehicleSelection)
+router.put("/user-vehicle/:id/update-selection",authenticateToken,updateVehicleSelection)
 router.delete("/user-vehicle/:id",authenticateToken,deleteUserVehicle)
 router.post("/backend-vehicle",addBackendVehicle)
 router.get("/backend-vehicle",getAllVehicles)
 router.post("/booking",authenticateToken,createBooking)
-
-
-
-
-
 export default router;

@@ -42,6 +42,7 @@ Vehicle.init(
     {
         sequelize,
         tableName: "vehicle", // This is the name of the table in your database
+        timestamps: true,
     }
 );
 

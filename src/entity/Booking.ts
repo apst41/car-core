@@ -75,6 +75,7 @@ Booking.init(
     {
         sequelize,
         tableName: "booking",
+        timestamps: true,
     }
 );
 

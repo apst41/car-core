@@ -45,6 +45,7 @@ UserAddress.init(
     {
         sequelize,
         tableName: "user_address",
+        timestamps: true,
     }
 );
 
