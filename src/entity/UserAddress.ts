@@ -9,6 +9,7 @@ class UserAddress extends Model {
     public addressText!: string;
     public city!: string;  // Added city field
     public pincode!: string;  // Added pincode field
+public isSelected?: boolean;
 }
 
 UserAddress.init(
@@ -40,6 +41,11 @@ UserAddress.init(
         pincode: {
             type: DataTypes.STRING,
             allowNull: false, // Cannot be null
+        },
+        isSelected: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
+            defaultValue: false,
         },
     },
     {
