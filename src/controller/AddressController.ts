@@ -51,7 +51,7 @@ export const deleteAddress = async (req: Request, res: Response): Promise<any> =
         const deleted = await UserAddress.destroy({ where: { id: addressId } });
 
         if (!deleted) {
-            return res.status(404).json({ message: "Address not found" });
+            return res.status(200).json({ message: "Address not found" });
         }
 
         return res.status(200).json({ message: "Address deleted successfully" });
@@ -74,7 +74,7 @@ export const updateAddress = async (req: Request, res: Response): Promise<any> =
         const address = await UserAddress.findOne({ where: { id: addressId } });
 
         if (!address) {
-            return res.status(404).json({ message: "Address not found" });
+            return res.status(200).json({ message: "Address not found" });
         }
 
         await address.update({ latitude, longitude, tag, addressText,city,pincode });

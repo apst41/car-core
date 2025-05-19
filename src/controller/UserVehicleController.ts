@@ -51,7 +51,7 @@ export const getUserVehicles = async (req: Request, res: Response): Promise<any>
         });
 
         if (!userVehicles || userVehicles.length === 0) {
-            return res.status(404).json({ message: "No vehicles found for the user" });
+            return res.status(200).json({ message: "No vehicles found for the user" });
         }
 
         // Get vehicle details based on vehicleId
@@ -97,7 +97,7 @@ export const getUserVehicleById = async (req: Request, res: Response): Promise<a
         const userVehicle = await UserVehicle.findOne({ where: { id } });
 
         if (!userVehicle) {
-            return res.status(404).json({ message: "UserVehicle not found" });
+            return res.status(200).json({ message: "UserVehicle not found" });
         }
 
         const vehicle = await Vehicle.findOne({ where: { id: userVehicle.vehicleId } });
@@ -123,7 +123,7 @@ export const updateVehicleSelection = async (req: Request, res: Response): Promi
         const userVehicle = await UserVehicle.findByPk(id);
 
         if (!userVehicle) {
-            return res.status(404).json({ message: "UserVehicle not found" });
+            return res.status(200).json({ message: "UserVehicle not found" });
         }
 
         // If there's any other vehicle selected, unselect it
@@ -159,7 +159,7 @@ export const deleteUserVehicle = async (req: Request, res: Response): Promise<an
         const userVehicle = await UserVehicle.findByPk(id);
 
         if (!userVehicle) {
-            return res.status(404).json({ message: "UserVehicle not found" });
+            return res.status(200).json({ message: "UserVehicle not found" });
         }
 
         // Delete the UserVehicle

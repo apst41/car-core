@@ -36,7 +36,7 @@ export const getAllVehicles = async (req: Request, res: Response): Promise<any> 
         const vehicles = await Vehicle.findAll();
 
         if (!vehicles || vehicles.length === 0) {
-            return res.status(404).json({ message: "No vehicles found" });
+            return res.status(200).json({ message: "No vehicles found" });
         }
 
         // Return the list of vehicles

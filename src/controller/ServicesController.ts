@@ -16,7 +16,7 @@ export const getServiceById = async (req: Request, res: Response): Promise<any> 
     try {
         const service = await Services.findByPk(req.params.id);
         if (!service) {
-            return res.status(404).json({ message: "Service not found" });
+            return res.status(200).json({ message: "Service not found" });
         }
 
         const serviceDetails = await ServicesDetails.findOne({ where: { serviceId: service.id } });
@@ -34,7 +34,7 @@ export const getPopularServices = async (req: Request, res: Response): Promise<a
     try {
         const service = await Services.findAll({where: {isPopular: true}});
         if (!service) {
-            return res.status(404).json({ message: "Service not found" });
+            return res.status(200).json({ message: "Service not found" });
         }
 
         return res.status(200).json({
@@ -64,7 +64,7 @@ export const updateService = async (req: Request, res: Response): Promise<any> =
         const service = await Services.findByPk(req.params.id);
 
         if (!service) {
-            return res.status(404).json({ message: "Service not found" });
+            return res.status(200).json({ message: "Service not found" });
         }
 
         await service.update({ title, icon });
@@ -80,7 +80,7 @@ export const deleteService = async (req: Request, res: Response): Promise<any> =
         const service = await Services.findByPk(req.params.id);
 
         if (!service) {
-            return res.status(404).json({ message: "Service not found" });
+            return res.status(200).json({ message: "Service not found" });
         }
 
         await service.destroy();

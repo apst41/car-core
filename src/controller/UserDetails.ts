@@ -14,7 +14,7 @@ export const getUserDetails = async (req: Request, res: Response): Promise<any> 
         const user = await User.findOne({ where: { id } });
 
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(200).json({ message: "User not found" });
         }
         return res.status(200).json({
             id:user.id,
