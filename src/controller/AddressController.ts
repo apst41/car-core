@@ -112,7 +112,7 @@ export const updateSelection = async (req: Request, res: Response): Promise<any>
         );
 
         if (updatedCount === 0) {
-            return res.status(404).json({ message: "Address not found or does not belong to the user" });
+            return res.status(200).json({ message: "Address not found or does not belong to the user" });
         }
 
         // Fetch the updated address to return
@@ -138,7 +138,7 @@ export const getUserAddresses = async (req: Request, res: Response): Promise<any
         const addresses = await UserAddress.findAll({ where: { userId } });
 
         if (!addresses.length) {
-            return res.status(404).json({ message: "No addresses found for this user" });
+            return res.status(200).json({ message: "No addresses found for this user" });
         }
 
         return res.status(200).json(addresses);
