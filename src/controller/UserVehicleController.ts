@@ -153,13 +153,19 @@ export const updateVehicleSelection = async (req: Request, res: Response): Promi
 
 export const deleteUserVehicle = async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;  // This is the userVehicleId from the URL parameter
+    const userId = (req as any).user?.id;
 
     try {
         // Find the UserVehicle by userVehicleId (id from params)
-        const userVehicle = await UserVehicle.findByPk(id);
+        const userVehicle = await UserVehicle.findOne({
+            where: {
+                id,
+                userId,
+            },
+        });
 
         if (!userVehicle) {
-            return res.status(200).json({ message: "UserVehicle not found" });
+            return res.status(200).json({ message: "Vehicle not found for the user" });
         }
 
         // Delete the UserVehicle
