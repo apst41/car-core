@@ -89,7 +89,7 @@ export const updateAddress = async (req: Request, res: Response): Promise<any> =
 export const updateSelection = async (req: Request, res: Response): Promise<any> => {
     try {
         const { addressId } = req.params;
-        const userId = (req as any).user.id;
+        const userId = (req as any).user?.id; // Fetch userId from request object
 
         if (!addressId) {
             return res.status(400).json({ message: "Address ID is required" });
