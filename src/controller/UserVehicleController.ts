@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import UserVehicle from "../entity/UserVehicle";
-import Vehicle from "../entity/Vehicle"; // Adjust the path as needed
+import Manufacturer from "../entity/Manufacturer"; // Adjust the path as needed
 
 export const addVehicle = async (req: Request, res: Response): Promise<any> => {
     const userId = (req as any).user?.id;
@@ -27,7 +27,7 @@ export const addVehicle = async (req: Request, res: Response): Promise<any> => {
         });
 
         return res.status(201).json({
-            message: "Vehicle added successfully",
+            message: "Manufacturer added successfully",
             data: newVehicle,
         });
     } catch (error) {
@@ -57,7 +57,7 @@ export const getUserVehicles = async (req: Request, res: Response): Promise<any>
         // Get vehicle details based on vehicleId
         const vehicleDetails = await Promise.all(
             userVehicles.map(async (userVehicle) => {
-                const vehicle = await Vehicle.findOne({
+                const vehicle = await Manufacturer.findOne({
                     where: { id: userVehicle.vehicleId },
                     attributes: [
                         "id",
@@ -100,7 +100,7 @@ export const getUserVehicleById = async (req: Request, res: Response): Promise<a
             return res.status(200).json({ message: "UserVehicle not found" });
         }
 
-        const vehicle = await Vehicle.findOne({ where: { id: userVehicle.vehicleId } });
+        const vehicle = await Manufacturer.findOne({ where: { id: userVehicle.vehicleId } });
 
         return res.status(200).json({
             message: "UserVehicle fetched successfully",
@@ -142,7 +142,7 @@ export const updateVehicleSelection = async (req: Request, res: Response): Promi
         await userVehicle.save();
 
         return res.status(200).json({
-            message: "Vehicle selection updated successfully",
+            message: "Manufacturer selection updated successfully",
             data: userVehicle,
         });
     } catch (error) {
@@ -165,7 +165,7 @@ export const deleteUserVehicle = async (req: Request, res: Response): Promise<an
         });
 
         if (!userVehicle) {
-            return res.status(200).json({ message: "Vehicle not found for the user" });
+            return res.status(200).json({ message: "Manufacturer not found for the user" });
         }
 
         // Delete the UserVehicle

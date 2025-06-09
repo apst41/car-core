@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import Services from "../entity/Services"; // adjust the path as needed
+import Packages from "../entity/Packages"; // adjust the path as needed
 import ServicesDetails from '../entity/ServiceDetails';
 
 export const getAllServices = async (req: Request, res: Response): Promise<any> => {
     try {
-        const services = await Services.findAll();
+        const services = await Packages.findAll();
         return res.status(200).json(services);
     } catch (error) {
         console.error(error);
@@ -14,7 +14,7 @@ export const getAllServices = async (req: Request, res: Response): Promise<any> 
 
 export const getServiceById = async (req: Request, res: Response): Promise<any> => {
     try {
-        const service = await Services.findByPk(req.params.id);
+        const service = await Packages.findByPk(req.params.id);
         if (!service) {
             return res.status(200).json({ message: "Service not found" });
         }
@@ -32,7 +32,7 @@ export const getServiceById = async (req: Request, res: Response): Promise<any> 
 
 export const getPopularServices = async (req: Request, res: Response): Promise<any> => {
     try {
-        const service = await Services.findAll({where: {isPopular: true}});
+        const service = await Packages.findAll({where: {isPopular: true}});
         if (!service) {
             return res.status(200).json({ message: "Service not found" });
         }
@@ -50,7 +50,7 @@ export const getPopularServices = async (req: Request, res: Response): Promise<a
 export const createService = async (req: Request, res: Response): Promise<any> => {
     try {
         const { title, icon } = req.body;
-        const newService = await Services.create({ title, icon });
+        const newService = await Packages.create({ title, icon });
         return res.status(201).json(newService);
     } catch (error) {
         console.error(error);
@@ -61,7 +61,7 @@ export const createService = async (req: Request, res: Response): Promise<any> =
 export const updateService = async (req: Request, res: Response): Promise<any> => {
     try {
         const { title, icon } = req.body;
-        const service = await Services.findByPk(req.params.id);
+        const service = await Packages.findByPk(req.params.id);
 
         if (!service) {
             return res.status(200).json({ message: "Service not found" });
@@ -77,7 +77,7 @@ export const updateService = async (req: Request, res: Response): Promise<any> =
 
 export const deleteService = async (req: Request, res: Response): Promise<any> => {
     try {
-        const service = await Services.findByPk(req.params.id);
+        const service = await Packages.findByPk(req.params.id);
 
         if (!service) {
             return res.status(200).json({ message: "Service not found" });

@@ -4,7 +4,7 @@ import sequelize from "./Database";
 class UserVehicle extends Model {
     public id!: number;
     public userId!: number;
-    public vehicleId!: number;
+    public carModelId!: number;
     public isSelected!: boolean;
 }
 

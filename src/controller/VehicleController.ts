@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Vehicle from "../entity/Vehicle";  // Import your Vehicle model
+import Manufacturer from "../entity/Manufacturer";  // Import your Manufacturer model
 
 export const addBackendVehicle = async (req: Request, res: Response): Promise<any> => {
     const { manufacturer, model, type, manufacturerImage, modelImage } = req.body;
@@ -10,8 +10,8 @@ export const addBackendVehicle = async (req: Request, res: Response): Promise<an
     }
 
     try {
-        // Create a new Vehicle instance
-        const newVehicle = await Vehicle.create({
+        // Create a new Manufacturer instance
+        const newVehicle = await Manufacturer.create({
             manufacturer,
             model,
             type,
@@ -21,7 +21,7 @@ export const addBackendVehicle = async (req: Request, res: Response): Promise<an
 
         // Return success message with the newly created vehicle
         return res.status(201).json({
-            message: "Vehicle added successfully",
+            message: "Manufacturer added successfully",
             data: newVehicle,
         });
     } catch (error) {
@@ -33,7 +33,7 @@ export const addBackendVehicle = async (req: Request, res: Response): Promise<an
 export const getAllVehicles = async (req: Request, res: Response): Promise<any> => {
     try {
         // Fetch all vehicles from the database
-        const vehicles = await Vehicle.findAll();
+        const vehicles = await Manufacturer.findAll();
 
         if (!vehicles || vehicles.length === 0) {
             return res.status(200).json({ message: "No vehicles found" });
