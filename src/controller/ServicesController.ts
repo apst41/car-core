@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Packages from "../entity/Packages"; // adjust the path as needed
-import ServicesDetails from '../entity/ServiceDetails';
+import ServicesDetails from '../entity/PackageDetails';
 
 export const getAllServices = async (req: Request, res: Response): Promise<any> => {
     try {

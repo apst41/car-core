@@ -1,31 +1,38 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "./Database";
 
-class ServiceDetails extends Model {
+class PackageDetails extends Model {
     public id!: number;
-    public serviceId!: string;
+    public serviceIds!: Set<string>;
     public name!: string;
     public price!: number;
     public discount!: number;
     public durationMinutes!: number;
     public videos!: string[];
-    public serviceInclusions!: {
+    public PackageInclusions!: {
         title: string;
         description: string;
         image_url: string;
     }[];
 }
 
-ServiceDetails.init(
+PackageDetails.init(
     {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
         },
-        serviceId: {
-            type: DataTypes.STRING,
+        serviceIds: {
+            type: DataTypes.JSON, // Stored as an array of strings
             allowNull: false,
+            get() {
+                const raw = this.getDataValue("serviceIds");
+                return new Set(raw);
+            },
+            set(val: Set<string>) {
+                this.setDataValue("serviceIds", Array.from(val));
+            },
         },
         name: {
             type: DataTypes.STRING,
@@ -54,9 +61,9 @@ ServiceDetails.init(
     },
     {
         sequelize,
-        tableName: "service_details",
+        tableName: "package_details",
         timestamps: true,
     }
 );
 
-export default ServiceDetails;
+export default PackageDetails;

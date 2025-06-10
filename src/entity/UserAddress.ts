@@ -7,8 +7,8 @@ class UserAddress extends Model {
     public longitude?: number;
     public tag?: string;
     public addressText!: string;
-    public city!: string;  // Added city field
-    public pincode!: string;  // Added pincode field
+    public city!: string;
+    public pincode!: string;
 public isSelected?: boolean;
 }
 

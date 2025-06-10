@@ -4,7 +4,7 @@ import Booking from "../entity/Booking";
 import Slot from "../entity/Slot";
 import UserAddress from "../entity/UserAddress";
 import UserVehicle from "../entity/UserVehicle";
-import ServiceDetails from "../entity/ServiceDetails"; // Assuming this is your service details entity
+import PackageDetails from "../entity/PackageDetails"; // Assuming this is your service details entity
 import sequelize from "../entity/Database";
 
 export const createBooking = async (req: Request, res: Response): Promise<any> => {
@@ -54,7 +54,7 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
         await slot.save({ transaction }); // Save the updated slot count
 
         // Fetch the service details to calculate the final amount
-        const serviceDetails = await ServiceDetails.findOne({
+        const serviceDetails = await PackageDetails.findOne({
             where: { id: serviceDetailsId },
             transaction,
         });
