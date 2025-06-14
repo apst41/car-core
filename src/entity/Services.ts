@@ -3,10 +3,13 @@ import sequelize from "./Database";
 
 class Services extends Model {
     public id!: number;
-    public serviceId!: string;
     public title!: string;
     public thumbnail!: string;
+    public image_url!: string;
+    public description!: string;
     public price!: number;
+    public durationMinutes!: number;
+    public videos!: string[];
 }
 
 Services.init(
@@ -16,10 +19,6 @@ Services.init(
             primaryKey: true,
             autoIncrement: true,
         },
-        serviceId: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
         title: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -28,9 +27,25 @@ Services.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
+        image_url: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: false,
+        },
         price: {
             type: DataTypes.INTEGER,
             allowNull: false,
+        },
+        durationMinutes: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        videos: {
+            type: DataTypes.JSON,
+            allowNull: true,
         },
     },
     {
