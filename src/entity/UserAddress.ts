@@ -16,31 +16,31 @@ UserAddress.init(
     {
         userId: {
             type: DataTypes.STRING,
-            allowNull: false, // Cannot be null
+            allowNull: false,
         },
         latitude: {
             type: DataTypes.FLOAT,
-            allowNull: true, // Can be null
+            allowNull: true,
         },
         longitude: {
             type: DataTypes.FLOAT,
-            allowNull: true, // Can be null
+            allowNull: true,
         },
         tag: {
             type: DataTypes.STRING,
-            allowNull: true, // Can be null
+            allowNull: true,
         },
         addressText: {
             type: DataTypes.STRING,
-            allowNull: false, // Cannot be null
+            allowNull: false,
         },
         city: {
             type: DataTypes.STRING,
-            allowNull: false, // Cannot be null
+            allowNull: false,
         },
         pincode: {
             type: DataTypes.STRING,
-            allowNull: false, // Cannot be null
+            allowNull: false,
         },
         isSelected: {
             type: DataTypes.BOOLEAN,

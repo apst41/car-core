@@ -24,7 +24,7 @@ PackageDetails.init(
             autoIncrement: true,
         },
         serviceIds: {
-            type: DataTypes.JSON, // Stored as an array of strings
+            type: DataTypes.JSON,
             allowNull: false,
             get() {
                 const raw = this.getDataValue("serviceIds");
@@ -55,7 +55,7 @@ PackageDetails.init(
             allowNull: true,
         },
         serviceInclusions: {
-            type: DataTypes.JSON, // array of objects
+            type: DataTypes.JSON,
             allowNull: true,
         },
     },
