@@ -11,7 +11,7 @@ import {
     updateAddress,
     updateSelection
 } from "../controller/AddressController";
-import {getAllServices, getPopularServices, getServiceById} from "../controller/ServicesController";
+import {getAllPackages, getPopularServices, getPackageById, getHomeBanner} from "../controller/PackagesController";
 import { getAvailableSlots} from "../controller/SlotController";
 import {
     addVehicle, deleteUserVehicle,
@@ -34,9 +34,9 @@ router.delete("/deleteAddress/:addressId",authenticateToken,deleteAddress)
 router.put("/updateAddress/:addressId",authenticateToken,updateAddress)
 router.put("/updateAddress/:addressId/update-selection",authenticateToken,updateSelection)
 router.get("/getAddress",authenticateToken,getUserAddresses)
-router.get("/services",authenticateToken,getAllServices)
-router.get("/service-details/:id",authenticateToken,getServiceById)
-router.get("/popular-services",authenticateToken,getPopularServices)
+router.get("/packages",authenticateToken,getHomeBanner)
+router.get("/package-details/:id",authenticateToken,getPackageById)
+router.get("/popular-packages",authenticateToken,getPopularServices)
 router.get("/time-slot",authenticateToken,getAvailableSlots)
 router.post("/user-vehicle",authenticateToken,addVehicle)
 router.get("/user-vehicle",authenticateToken,getUserVehicles)

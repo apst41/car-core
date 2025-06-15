@@ -1,38 +1,43 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "./Database";
 
-class Services extends Model {
+class Banner extends Model {
     public id!: number;
-    public title!: string;
     public imageUrl!: string;
-    public description!: string;
+    public action!: string;
+    public type!: string;
+    public ctaText!: string;
 }
 
-Services.init(
+Banner.init(
     {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
         },
-        title: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
         imageUrl: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        description: {
-            type: DataTypes.TEXT,
+        action: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        type: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        ctaText: {
+            type: DataTypes.STRING,
             allowNull: false,
         },
     },
     {
         sequelize,
-        tableName: "services",
+        tableName: "banners",
         timestamps: true,
     }
 );
 
-export default Services;
+export default Banner;

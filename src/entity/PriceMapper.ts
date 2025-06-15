@@ -1,14 +1,14 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "./Database";
 
-class Services extends Model {
+class PriceMapper extends Model {
     public id!: number;
-    public title!: string;
-    public imageUrl!: string;
-    public description!: string;
+    public price!: number;
+    public name!: string;
+    public vehicleId!: number;
 }
 
-Services.init(
+PriceMapper.init(
     {
         id: {
             type: DataTypes.INTEGER,
@@ -35,4 +35,4 @@ Services.init(
     }
 );
 
-export default Services;
+export default PriceMapper;

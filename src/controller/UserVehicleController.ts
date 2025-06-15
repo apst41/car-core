@@ -58,7 +58,7 @@ export const getUserVehicles = async (req: Request, res: Response): Promise<any>
         const vehicleDetails = await Promise.all(
             userVehicles.map(async (userVehicle) => {
                 const vehicle = await Manufacturer.findOne({
-                    where: { id: userVehicle.vehicleId },
+                    where: { id: userVehicle.carModelId },
                     attributes: [
                         "id",
                         "manufacturer",
@@ -100,7 +100,7 @@ export const getUserVehicleById = async (req: Request, res: Response): Promise<a
             return res.status(200).json({ message: "UserVehicle not found" });
         }
 
-        const vehicle = await Manufacturer.findOne({ where: { id: userVehicle.vehicleId } });
+        const vehicle = await Manufacturer.findOne({ where: { id: userVehicle.carModelId } });
 
         return res.status(200).json({
             message: "UserVehicle fetched successfully",

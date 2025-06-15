@@ -63,9 +63,6 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
             return res.status(400).json({ message: "Invalid serviceDetailsId" });
         }
 
-        const price = serviceDetails.price || 0;
-        const discount = serviceDetails.discount || 0;
-        const finalAmount = price - discount; // Calculate the final amount after discount
 
         // Now, create the booking entry
         const booking = await Booking.create(
@@ -77,10 +74,7 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
                 slotId,
                 status: status || "PENDING", // Default to "PENDING"
                 notes: notes || "", // Default to empty string if no notes
-                city,
-                price,
-                discount,
-                finalAmount,
+                city
             },
             { transaction } // Include transaction here for atomicity
         );
