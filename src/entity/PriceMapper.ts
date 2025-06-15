@@ -3,9 +3,9 @@ import sequelize from "./Database";
 
 class PriceMapper extends Model {
     public id!: number;
-    public price!: number;
     public name!: string;
-    public vehicleId!: number;
+    public price!: number;       // Stored as integer
+    public modelId!: number;
 }
 
 PriceMapper.init(
@@ -15,22 +15,22 @@ PriceMapper.init(
             primaryKey: true,
             autoIncrement: true,
         },
-        title: {
+        name: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        imageUrl: {
-            type: DataTypes.STRING,
+        price: {
+            type: DataTypes.INTEGER,
             allowNull: false,
         },
-        description: {
-            type: DataTypes.TEXT,
+        modelId: {
+            type: DataTypes.INTEGER,
             allowNull: false,
         },
     },
     {
         sequelize,
-        tableName: "services",
+        tableName: "price_mapper",
         timestamps: true,
     }
 );
