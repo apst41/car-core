@@ -26,7 +26,7 @@ Manufacturer.init(
     },
     {
         sequelize,
-        tableName: "manufacturer",
+        tableName: "manufacturers",
         timestamps: true,
     }
 );

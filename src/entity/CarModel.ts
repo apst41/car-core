@@ -4,7 +4,8 @@ import sequelize from "./Database";
 class CarModel extends Model {
     public id!: number;
     public modelName!: string;
-    public modelType!: "Normal" | "Economy" | "Premium" | "Luxury";
+    public modelType!: string;
+    public category!: "Regular" | "Economy" | "Premium" | "Luxury";
     public modelImage?: string;
     public manufacturerName!: string;
     public manufacturerId!: number;
@@ -23,7 +24,11 @@ CarModel.init(
             allowNull: false,
         },
         modelType: {
-            type: DataTypes.ENUM("Normal", "Economy", "Premium", "Luxury"),
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        category: {
+            type: DataTypes.ENUM("Regular", "Economy", "Premium", "Luxury"),
             allowNull: false,
         },
         modelImage: {
@@ -41,7 +46,7 @@ CarModel.init(
     },
     {
         sequelize,
-        tableName: "car_model",
+        tableName: "carModel",
         timestamps: true,
     }
 );

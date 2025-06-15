@@ -21,6 +21,7 @@ import {
 } from "../controller/UserVehicleController";
 import {addBackendVehicle, getAllVehicles} from "../controller/VehicleController";
 import {createBooking} from "../controller/BookingController";
+import {getCarModel} from "../controller/CarModelService";
 
 const router = Router();
 
@@ -46,4 +47,5 @@ router.delete("/user-vehicle/:id",authenticateToken,deleteUserVehicle)
 router.post("/backend-vehicle",addBackendVehicle)
 router.get("/backend-vehicle",getAllVehicles)
 router.post("/booking",authenticateToken,createBooking)
+router.get("/carMode",authenticateToken,getCarModel)
 export default router;

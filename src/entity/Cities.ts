@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "./Database";
-
+import CarModel from "./CarModel";
 class Cities extends Model {
     public id!: number;
     public name!: string;
