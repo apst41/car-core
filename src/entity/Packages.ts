@@ -11,10 +11,9 @@ class Packages extends Model {
     public price!: number;
     public discount!: number;
     public durationMinutes!: number;
-    public videos!: string[];
+    public videos?: string; // ✅ fixed: made optional
     public title!: string;
     public description!: string;
-    public imageUrl!: string;
     public isActive?: boolean;
 }
 
@@ -66,8 +65,8 @@ Packages.init(
             allowNull: false,
         },
         videos: {
-            type: DataTypes.JSON,
-            allowNull: true,
+            type: DataTypes.STRING,
+            allowNull: true, // ✅ allows null in DB
         },
         title: {
             type: DataTypes.STRING,
@@ -75,10 +74,6 @@ Packages.init(
         },
         description: {
             type: DataTypes.TEXT,
-            allowNull: false,
-        },
-        imageUrl: {
-            type: DataTypes.STRING,
             allowNull: false,
         },
         isActive: {

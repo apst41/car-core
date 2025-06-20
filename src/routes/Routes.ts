@@ -22,6 +22,7 @@ import {
 import {addBackendVehicle, getAllVehicles} from "../controller/VehicleController";
 import {createBooking} from "../controller/BookingController";
 import {getCarModel} from "../controller/CarModelService";
+import {getPrice} from "../controller/PriceMapperService";
 
 const router = Router();
 
@@ -48,4 +49,5 @@ router.post("/backend-vehicle",addBackendVehicle)
 router.get("/backend-vehicle",getAllVehicles)
 router.post("/booking",authenticateToken,createBooking)
 router.get("/carMode",authenticateToken,getCarModel)
+router.get("/priceMapper",authenticateToken,getPrice)
 export default router;
