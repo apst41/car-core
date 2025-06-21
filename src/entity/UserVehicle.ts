@@ -20,7 +20,7 @@ UserVehicle.init(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        vehicleId: {
+        carModelId: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },

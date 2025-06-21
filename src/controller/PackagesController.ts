@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import Packages from "../entity/Packages"; // adjust the path as needed
 import Banner from "../entity/Banner";
+import UserVehicle from "../entity/UserVehicle";
+import CarModel from "../entity/CarModel";
+import PriceMapper from "../entity/PriceMapper";
+import Manufacturer from "../entity/Manufacturer";
+import Services from "../entity/Services";
 
 export const getAllPackages = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -12,20 +17,72 @@ export const getAllPackages = async (req: Request, res: Response): Promise<any> 
     }
 };
 
+
+const calculatePrice = (price: number, discount: number): number => {
+    const discountedPrice = price - (price * discount) / 100;
+    return Math.round(discountedPrice); // optional: round to nearest integer
+};
+
 export const getPackageById = async (req: Request, res: Response): Promise<any> => {
     try {
         const packages = await Packages.findByPk(req.params.id);
-        if (!packages) {
-            return res.status(200).json({ message: "Service not found" });
+        const userVehicle = await UserVehicle.findByPk(req.params.userVehicle);
+
+        if (!packages || !userVehicle) {
+            return res.status(200).json({ message: "Packages or Vehicle not found" });
         }
 
-        const serviceDetails = await Packages.findOne({ where: { serviceId: packages.id } });
+        const priceMapper = await PriceMapper.findOne({
+            where: {
+                packageId: req.params.id,
+                carModelId: userVehicle.carModelId,
+            }
+        });
+
+        if (!priceMapper) {
+            return res.status(200).json({ message: "Cannot find the price" });
+        }
+
+        const serviceMap = packages.serviceIds;
+
+        const serviceIds = serviceMap.map(s => s.id);
+
+        console.log("my serviceIds", serviceIds);
+
+        const servicesRaw = await Services.findAll({
+            where: {
+                id: serviceIds,
+            },
+        });
+
+
+        const servicesOrdered = serviceMap
+            .sort((a, b) => a.order - b.order)
+            .map(item => servicesRaw.find(service => service.id === item.id))
+            .filter(Boolean);
+
+
+        const banner_images = servicesOrdered
+            .map(service => service?.imageUrl)
+            .filter((url): url is string => !!url);
 
         return res.status(200).json({
-            serviceDetails
+            packages: {
+                packageId: packages.id,
+                title: packages.title,
+
+                one_liner: packages.oneLiner,
+                description: packages.description,
+
+            },
+            price: priceMapper.price,
+            discountedPrice: calculatePrice(priceMapper.price, packages.discount),
+            durationMinutes:packages.durationMinutes,
+            banner_images,
+            serviceInclusions: servicesOrdered,
         });
     } catch (error) {
-        console.error(error);
+        console.error("getPackageById error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };

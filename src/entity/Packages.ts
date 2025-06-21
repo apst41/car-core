@@ -3,7 +3,7 @@ import sequelize from "./Database";
 
 class Packages extends Model {
     public id!: number;
-    public serviceIds!: Set<string>;
+    public serviceIds!: { id: number; order: number }[];
     public icon!: string;
     public isPopular!: boolean;
     public oneLiner!: string;
@@ -11,7 +11,7 @@ class Packages extends Model {
     public price!: number;
     public discount!: number;
     public durationMinutes!: number;
-    public videos?: string; // ✅ fixed: made optional
+    public videos?: string;
     public title!: string;
     public description!: string;
     public isActive?: boolean;
@@ -29,10 +29,10 @@ Packages.init(
             allowNull: false,
             get() {
                 const raw = this.getDataValue("serviceIds");
-                return new Set(raw);
+                return Array.isArray(raw) ? raw : Object.values(raw); // always return as array
             },
-            set(val: Set<string>) {
-                this.setDataValue("serviceIds", Array.from(val));
+            set(val: { id: number; order: number }[]) {
+                this.setDataValue("serviceIds", val);
             },
         },
         icon: {
