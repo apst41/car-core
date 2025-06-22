@@ -5,6 +5,7 @@ class UserVehicle extends Model {
     public id!: number;
     public userId!: number;
     public carModelId!: number;
+   public manufacturerId!:number;
     public isSelected!: boolean;
 }
 
@@ -20,6 +21,11 @@ UserVehicle.init(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+        manufacturerId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+
         carModelId: {
             type: DataTypes.INTEGER,
             allowNull: false,

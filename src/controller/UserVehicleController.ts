@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import UserVehicle from "../entity/UserVehicle";
-import Manufacturer from "../entity/Manufacturer"; // Adjust the path as needed
+import Manufacturer from "../entity/Manufacturer";
+import CarModel from "../entity/CarModel"; // Adjust the path as needed
 
 export const addVehicle = async (req: Request, res: Response): Promise<any> => {
     const userId = (req as any).user?.id;
-    const { vehicleId, isSelected } = req.body;
+    const {isSelected,carModelId } = req.body;
 
-    if (!userId || !vehicleId) {
+    if (!userId || !carModelId) {
         return res.status(400).json({ message: "userId and vehicleId are required" });
     }
 
@@ -19,10 +20,18 @@ export const addVehicle = async (req: Request, res: Response): Promise<any> => {
             );
         }
 
+
+        const carModel = await CarModel.findByPk(carModelId);
+
+        if(!carModel) {
+            return res.status(200).json({ message: "Car not found" });
+        }
+
         // Create new vehicle entry
         const newVehicle = await UserVehicle.create({
             userId,
-            vehicleId,
+            carModelId,
+            manufacturerId:carModel.manufacturerId,
             isSelected: isSelected ?? false,
         });
 
@@ -47,31 +56,30 @@ export const getUserVehicles = async (req: Request, res: Response): Promise<any>
         // Fetch all user vehicles for the given user
         const userVehicles = await UserVehicle.findAll({
             where: { userId },
-            order: [["isSelected", "DESC"], ["id", "ASC"]], // Optional: selected ones first
+            order: [["isSelected", "DESC"], ["id", "ASC"]],
         });
 
         if (!userVehicles || userVehicles.length === 0) {
             return res.status(200).json({ message: "No vehicles found for the user" });
         }
 
-        // Get vehicle details based on vehicleId
         const vehicleDetails = await Promise.all(
             userVehicles.map(async (userVehicle) => {
-                const vehicle = await Manufacturer.findOne({
-                    where: { id: userVehicle.carModelId },
-                    attributes: [
-                        "id",
-                        "manufacturer",
-                        "model",
-                        "type",
-                        "manufacturerImage",
-                        "modelImage",
-                    ],
+                const manufacturer = await Manufacturer.findOne({
+                    where: { id: userVehicle.manufacturerId },
+                    attributes: ["id", "manufacturer", "manufacturerImage"],
+                });
+
+                const carModel = await CarModel.findByPk(userVehicle.carModelId, {
+                    attributes: ["id", "modelName", "modelType", "category"]
                 });
 
                 return {
-                    ...userVehicle.get(), // Include all fields from UserVehicle
-                    vehicle: vehicle ? vehicle.get() : null, // Merge vehicle details with userVehicle
+                    ...userVehicle.get(),
+                    vehicle: {
+                        manufacturer: manufacturer ? manufacturer.get() : null,
+                        model: carModel?.modelName ?? null,
+                    },
                 };
             })
         );
@@ -100,7 +108,7 @@ export const getUserVehicleById = async (req: Request, res: Response): Promise<a
             return res.status(200).json({ message: "UserVehicle not found" });
         }
 
-        const vehicle = await Manufacturer.findOne({ where: { id: userVehicle.carModelId } });
+        const vehicle = await Manufacturer.findOne({ where: { id: userVehicle.manufacturerId } });
 
         return res.status(200).json({
             message: "UserVehicle fetched successfully",
