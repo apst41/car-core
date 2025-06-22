@@ -6,18 +6,20 @@ import UserAddress from "../entity/UserAddress";
 import UserVehicle from "../entity/UserVehicle";
 import Services from "../entity/Services"; // Assuming this is your service details entity
 import sequelize from "../entity/Database";
+import Packages from "../entity/Packages";
+import PriceMapper from "../entity/PriceMapper";
+import {calculatePrice} from "./PackagesController";
 
 export const createBooking = async (req: Request, res: Response): Promise<any> => {
     const {
         userVehicleId,
         addressId,
-        serviceDetailsId,
+        packageId,
         slotId,
-        status,
         notes,
     } = req.body;
 
-    const userId = (req as any).user?.id; // Fetch userId from request object
+    const userId = (req as any).user?.id;
     if (!userId) {
         return res.status(400).json({ message: "User not authenticated" });
     }
@@ -39,7 +41,18 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
             return res.status(400).json({ message: "Invalid userVehicleId for the user" });
         }
 
-        // Fetch the slot and validate if it exists and if there are available slots
+        const priceMapper = await PriceMapper.findOne({
+            where: {
+                packageId: packageId,
+                carModelId: userVehicle.carModelId,
+            }
+        });
+
+        if (!priceMapper) {
+            return res.status(200).json({ message: "Price does not find" });
+        }
+
+
         const slot = await Slot.findOne({ where: { id: slotId }, transaction });
         if (!slot) {
             return res.status(400).json({ message: "Slot not found" });
@@ -54,14 +67,18 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
         await slot.save({ transaction }); // Save the updated slot count
 
         // Fetch the service details to calculate the final amount
-        const serviceDetails = await Services.findOne({
-            where: { id: serviceDetailsId },
+        const packages = await Packages.findOne({
+            where: { id: packageId },
             transaction,
         });
 
-        if (!serviceDetails) {
-            return res.status(400).json({ message: "Invalid serviceDetailsId" });
+
+
+        if (!packages) {
+            return res.status(200).json({ message: "Invalid packageId" });
         }
+
+        const price = calculatePrice(priceMapper.price, packages.discount)
 
 
         // Now, create the booking entry
@@ -70,10 +87,13 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
                 userId,
                 userVehicleId,
                 addressId,
-                serviceDetailsId,
+                packageId,
                 slotId,
-                status: status || "PENDING", // Default to "PENDING"
-                notes: notes || "", // Default to empty string if no notes
+                price: priceMapper.price,
+                discount: priceMapper.price-price,
+                finalAmount: price,
+                status:"PENDING",
+                notes: notes || "",
                 city
             },
             { transaction } // Include transaction here for atomicity

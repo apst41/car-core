@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import User from "../entity/User";
 import jwt from 'jsonwebtoken';
+import {myCache} from "./middleware/AuthMiddleware";
 
 export const register = async (req: Request, res: Response): Promise<any> => {
     const { name, username, email, password, mobileNo } = req.body;
@@ -239,3 +240,31 @@ function getOtp() {
     return res.status(200).json({ message: 'Token is valid' });
 
  }
+
+export const logout = async (req: Request, res: Response): Promise<any> => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+        return res.status(200).json({ message: 'Token is required' });
+    }
+
+    try {
+        const user = await User.findOne({ where: { token } });
+
+        if (!user) {
+            return res.status(200).json({ message: 'Invalid token or already logged out' });
+        }
+
+        myCache.del(token);
+        await user.update({
+            token: null,
+            tokenExpiry: null,
+        });
+
+        return res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};

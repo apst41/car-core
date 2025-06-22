@@ -18,7 +18,7 @@ export const getAllPackages = async (req: Request, res: Response): Promise<any> 
 };
 
 
-const calculatePrice = (price: number, discount: number): number => {
+export const calculatePrice = (price: number, discount: number): number => {
     const discountedPrice = price - (price * discount) / 100;
     return Math.round(discountedPrice); // optional: round to nearest integer
 };

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import User from "../../entity/User";
 import NodeCache from "node-cache";
 
-const myCache = new NodeCache();
+export const myCache = new NodeCache();
 
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

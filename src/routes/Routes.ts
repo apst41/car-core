@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {healthCheck} from "../controller/Controller";
-import {verifyotp, register} from "../controller/Auth";
+import {verifyotp, register, logout} from "../controller/Auth";
 import {getCities} from "../controller/CitiesController";
 import {getUserDetails} from "../controller/UserDetails";
 import {authenticateToken} from "../controller/middleware/AuthMiddleware";
@@ -12,7 +12,7 @@ import {
     updateSelection
 } from "../controller/AddressController";
 import {getAllPackages, getPopularServices, getPackageById, getHomeBanner} from "../controller/PackagesController";
-import { getAvailableSlots} from "../controller/SlotController";
+import {generateSlots, getAvailableSlots} from "../controller/SlotController";
 import {
     addVehicle, deleteUserVehicle,
     getUserVehicleById,
@@ -50,4 +50,6 @@ router.get("/backend-vehicle",getAllVehicles)
 router.post("/booking",authenticateToken,createBooking)
 router.get("/carMode",authenticateToken,getCarModel)
 router.get("/priceMapper",authenticateToken,getPrice)
+router.post("/slot",generateSlots)
+router.get("/auth/logout",authenticateToken,logout)
 export default router;

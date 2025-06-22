@@ -9,7 +9,7 @@ class Booking extends Model {
 
     public userVehicleId!: number;
     public addressId!: number;
-    public serviceDetailsId!: number;
+    public packageId!: number;
     public slotId!: number;
 
     public price!: number;
@@ -46,7 +46,7 @@ Booking.init(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        serviceDetailsId: {
+        packageId: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
