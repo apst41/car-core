@@ -9,6 +9,8 @@ import sequelize from "../entity/Database";
 import Packages from "../entity/Packages";
 import PriceMapper from "../entity/PriceMapper";
 import {calculatePrice} from "./PackagesController";
+import Manufacturer from "../entity/Manufacturer";
+import CarModel from "../entity/CarModel";
 
 export const createBooking = async (req: Request, res: Response): Promise<any> => {
     const {
@@ -21,7 +23,7 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
 
     const userId = (req as any).user?.id;
     if (!userId) {
-        return res.status(400).json({ message: "User not authenticated" });
+        return res.status(200).json({ message: "User not authenticated" });
     }
 
     const transaction: Transaction = await sequelize.transaction(); // Start the transaction
@@ -30,7 +32,7 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
         // Validate if the provided addressId exists for the user
         const userAddress = await UserAddress.findOne({ where: { id: addressId, userId }, transaction });
         if (!userAddress) {
-            return res.status(400).json({ message: "Invalid addressId for the user" });
+            return res.status(200).json({ message: "Invalid addressId for the user" });
         }
 
         const city = userAddress.city; // Get the city from user address
@@ -38,7 +40,7 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
         // Validate if the provided userVehicleId exists for the user
         const userVehicle = await UserVehicle.findOne({ where: { id: userVehicleId, userId }, transaction });
         if (!userVehicle) {
-            return res.status(400).json({ message: "Invalid userVehicleId for the user" });
+            return res.status(200).json({ message: "Invalid userVehicleId for the user" });
         }
 
         const priceMapper = await PriceMapper.findOne({
@@ -55,11 +57,11 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
 
         const slot = await Slot.findOne({ where: { id: slotId }, transaction });
         if (!slot) {
-            return res.status(400).json({ message: "Slot not found" });
+            return res.status(200).json({ message: "Slot not found" });
         }
 
         if (slot.slotCount <= 0) {
-            return res.status(400).json({ message: "No available slots" });
+            return res.status(200).json({ message: "No available slots" });
         }
 
         // Reduce slotCount by 1
@@ -113,3 +115,51 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
+
+export const getAllBookings = async (req: Request, res: Response): Promise<any> => {
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+        return res.status(200).json({ message: "User not authenticated" });
+    }
+
+    try {
+        const bookings = await Booking.findAll({
+            where: { userId },
+            order: [["createdAt", "DESC"]],
+        });
+
+        const detailedBookings = await Promise.all(
+            bookings.map(async (booking) => {
+                const slot = await Slot.findByPk(booking.slotId);
+                const packageInfo = await Packages.findByPk(booking.packageId);
+                const vehicle = await UserVehicle.findByPk(booking.userVehicleId);
+                const manufacturer = await Manufacturer.findByPk(vehicle?.manufacturerId);
+                const carModel = await CarModel.findByPk(vehicle?.carModelId);
+                const address = await UserAddress.findByPk(booking.addressId);
+
+                return {
+                    booking:booking.get(),
+                    slot: slot ? slot.get() : null,
+                    vehicle: {
+                        manufacturer: manufacturer?.manufacturer ?? null,
+                        manufacturerImage: manufacturer?.manufacturerImage ?? null,
+                        modelName: carModel?.modelName ?? null,
+                    },
+                    address: address ? address.get() : null,
+                };
+            })
+        );
+
+        return res.status(200).json({
+            message: "Bookings fetched successfully",
+            data: detailedBookings,
+        });
+    } catch (error) {
+        console.error("Error fetching bookings:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+

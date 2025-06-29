@@ -53,7 +53,6 @@ export const getUserVehicles = async (req: Request, res: Response): Promise<any>
     }
 
     try {
-        // Fetch all user vehicles for the given user
         const userVehicles = await UserVehicle.findAll({
             where: { userId },
             order: [["isSelected", "DESC"], ["id", "ASC"]],
@@ -67,18 +66,19 @@ export const getUserVehicles = async (req: Request, res: Response): Promise<any>
             userVehicles.map(async (userVehicle) => {
                 const manufacturer = await Manufacturer.findOne({
                     where: { id: userVehicle.manufacturerId },
-                    attributes: ["id", "manufacturer", "manufacturerImage"],
+                    attributes: ["manufacturer", "manufacturerImage"],
                 });
 
                 const carModel = await CarModel.findByPk(userVehicle.carModelId, {
-                    attributes: ["id", "modelName", "modelType", "category"]
+                    attributes: ["modelName"]
                 });
 
                 return {
                     ...userVehicle.get(),
                     vehicle: {
-                        manufacturer: manufacturer ? manufacturer.get() : null,
-                        model: carModel?.modelName ?? null,
+                        manufacturer: manufacturer?.manufacturer ?? null,
+                        manufacturerImage: manufacturer?.manufacturerImage ?? null,
+                        modelName: carModel?.modelName ?? null,
                     },
                 };
             })

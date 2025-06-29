@@ -20,7 +20,7 @@ import {
     updateVehicleSelection
 } from "../controller/UserVehicleController";
 import {addBackendVehicle, getAllVehicles} from "../controller/VehicleController";
-import {createBooking} from "../controller/BookingController";
+import {createBooking, getAllBookings} from "../controller/BookingController";
 import {getCarModel} from "../controller/CarModelService";
 import {getPrice} from "../controller/PriceMapperService";
 
@@ -52,4 +52,5 @@ router.get("/carModel/:manufacturerId",authenticateToken,getCarModel)
 router.get("/priceMapper",authenticateToken,getPrice)
 router.post("/slot",generateSlots)
 router.get("/auth/logout",authenticateToken,logout)
+router.get("/booking",authenticateToken,getAllBookings)
 export default router;
