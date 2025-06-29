@@ -106,7 +106,7 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
 
         return res.status(201).json({
             message: "Booking created successfully",
-            booking,
+            data:booking,
         });
     } catch (error) {
         // Rollback the transaction in case of error
@@ -159,6 +159,151 @@ export const getAllBookings = async (req: Request, res: Response): Promise<any> 
     } catch (error) {
         console.error("Error fetching bookings:", error);
         return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const cancelBooking = async (req: Request, res: Response): Promise<any> => {
+    const userId = (req as any).user?.id;
+    const { bookingId } = req.body;
+
+    if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    const transaction = await sequelize.transaction();
+
+    try {
+        const booking = await Booking.findOne({
+            where: { id: bookingId, userId },
+            transaction
+        });
+
+        if (!booking) {
+            return res.status(200).json({ message: "Booking not found" });
+        }
+
+        if (booking.status === "CANCELLED") {
+            return res.status(200).json({ message: "Booking already cancelled" });
+        }
+
+        booking.status = "CANCELLED";
+        await booking.save({ transaction });
+
+        // Increment the slot count back
+        const slot = await Slot.findByPk(booking.slotId, { transaction });
+        if (slot) {
+            slot.slotCount += 1;
+            await slot.save({ transaction });
+        }
+
+        await transaction.commit();
+
+        return res.status(200).json({ message: "Booking cancelled successfully" });
+    } catch (error) {
+        await transaction.rollback();
+        console.error("Cancel booking error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const rescheduleBooking = async (req: Request, res: Response): Promise<any> => {
+    const userId = (req as any).user?.id;
+    const { bookingId, newSlotId } = req.body;
+
+    if (!userId) {
+        return res.status(200).json({ message: "User not authenticated" });
+    }
+
+    const transaction = await sequelize.transaction();
+
+    try {
+        const existingBooking = await Booking.findOne({
+            where: { id: bookingId, userId },
+            transaction,
+        });
+
+        if (!existingBooking) {
+            return res.status(200).json({ message: "Booking not found" });
+        }
+
+        if (existingBooking.status === "CANCELLED") {
+            return res.status(200).json({ message: "Cannot reschedule a cancelled booking" });
+        }
+
+        const oldSlot = await Slot.findByPk(existingBooking.slotId, { transaction });
+        const newSlot = await Slot.findByPk(newSlotId, { transaction });
+
+        if (!newSlot) {
+            return res.status(200).json({ message: "New slot not found" });
+        }
+
+        if (newSlot.slotCount <= 0) {
+            return res.status(400).json({ message: "No availability in the new slot" });
+        }
+
+        existingBooking.status = "RESCHEDULED";
+        await existingBooking.save({ transaction });
+
+        if (oldSlot) {
+            oldSlot.slotCount += 1;
+            await oldSlot.save({ transaction });
+        }
+
+        newSlot.slotCount -= 1;
+        await newSlot.save({ transaction });
+
+
+        const { userVehicleId, addressId, packageId, notes, city } = existingBooking;
+
+        const priceMapper = await PriceMapper.findOne({
+            where: {
+                packageId,
+                carModelId: existingBooking.userVehicleId ? (
+                    (await UserVehicle.findByPk(existingBooking.userVehicleId))?.carModelId
+                ) : null
+            },
+            transaction
+        });
+
+        if (!priceMapper) {
+            throw new Error("Price not found for rescheduling");
+        }
+
+        const packages = await Packages.findOne({ where: { id: packageId }, transaction });
+        if (!packages) {
+            throw new Error("Package not found");
+        }
+
+        const price = calculatePrice(priceMapper.price, packages.discount);
+
+        // Create new booking
+        const newBooking = await Booking.create(
+            {
+                userId,
+                userVehicleId,
+                addressId,
+                packageId,
+                slotId: newSlotId,
+                price: priceMapper.price,
+                discount: priceMapper.price - price,
+                finalAmount: price,
+                status: "PENDING",
+                notes: notes || "",
+                city,
+            },
+            { transaction }
+        );
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            message: "Booking rescheduled successfully",
+            data:newBooking,
+        });
+    } catch (error) {
+        await transaction.rollback();
+        console.error("Reschedule booking error:", error);
+        return res.status(500).json({ message: "Internal server error"});
     }
 };
 
