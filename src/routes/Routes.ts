@@ -23,6 +23,7 @@ import {addBackendVehicle, getAllVehicles} from "../controller/VehicleController
 import {cancelBooking, createBooking, getAllBookings, rescheduleBooking} from "../controller/BookingController";
 import {getCarModel} from "../controller/CarModelService";
 import {getPrice} from "../controller/PriceMapperService";
+import {getFeedback, getFeedbackById, saveFeedback} from "../controller/FeedBackService";
 
 const router = Router();
 
@@ -55,4 +56,7 @@ router.get("/auth/logout",authenticateToken,logout)
 router.get("/booking",authenticateToken,getAllBookings)
 router.delete("/booking",authenticateToken,cancelBooking)
 router.put("/booking",authenticateToken,rescheduleBooking)
+router.post("/feedback",authenticateToken,saveFeedback)
+router.get("/feedback",authenticateToken,getFeedback)
+router.get("/feedback/:id",authenticateToken,getFeedbackById)
 export default router;
