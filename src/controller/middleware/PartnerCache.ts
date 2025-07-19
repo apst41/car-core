@@ -15,9 +15,8 @@ export const getCachedAddressById = async (id:any) => {
     const cached = addressPartnerCache.get(id);
     if (cached) return cached;
 
-    const address = await Address.findByPk(id,{
-        attributes:['createdAt','updatedAt','isSelected',],
-    });
+    const address = await Address.findByPk(id);
+
     if (address) {
         addressPartnerCache.set(id, address);
     }
