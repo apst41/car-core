@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Feedback from "../entity/Feedback";
-import Booking from "../entity/Booking";
+import Feedback from "../../entity/apps/Feedback";
+import Booking from "../../entity/apps/Booking";
 
 export const saveFeedback = async (req: Request, res: Response): Promise<any> => {
     try {

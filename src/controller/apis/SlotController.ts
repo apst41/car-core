@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Op, fn, literal } from 'sequelize';
-import Slot from '../entity/Slot'; // Adjust path if needed
+import Slot from '../../entity/apps/Slot'; // Adjust path if needed
 import moment from 'moment';
 
 export const getAvailableSlots = async (req: Request, res: Response): Promise<any> => {

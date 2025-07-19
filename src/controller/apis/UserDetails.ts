@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import User from "../entity/User";
+import User from "../../entity/apps/User";
 
 export const getUserDetails = async (req: Request, res: Response): Promise<any> => {
 

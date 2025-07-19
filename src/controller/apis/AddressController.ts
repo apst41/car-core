@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import UserAddress from "../entity/UserAddress";
+import UserAddress from "../../entity/apps/UserAddress";
 
 // Add Address
 export const addAddress = async (req: Request, res: Response): Promise<any> => {

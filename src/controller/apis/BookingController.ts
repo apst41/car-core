@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
 import { Transaction } from "sequelize";
-import Booking from "../entity/Booking";
-import Slot from "../entity/Slot";
-import UserAddress from "../entity/UserAddress";
-import UserVehicle from "../entity/UserVehicle";
-import Services from "../entity/Services"; // Assuming this is your service details entity
-import sequelize from "../entity/Database";
-import Packages from "../entity/Packages";
-import PriceMapper from "../entity/PriceMapper";
+import Booking from "../../entity/apps/Booking";
+import Slot from "../../entity/apps/Slot";
+import UserAddress from "../../entity/apps/UserAddress";
+import UserVehicle from "../../entity/apps/UserVehicle";
+import Services from "../../entity/apps/Services"; // Assuming this is your service details entity
+import sequelize from "../../entity/apps/Database";
+import Packages from "../../entity/apps/Packages";
+import PriceMapper from "../../entity/apps/PriceMapper";
 import {calculatePrice} from "./PackagesController";
-import Manufacturer from "../entity/Manufacturer";
-import CarModel from "../entity/CarModel";
+import Manufacturer from "../../entity/apps/Manufacturer";
+import CarModel from "../../entity/apps/CarModel";
 
 export const createBooking = async (req: Request, res: Response): Promise<any> => {
     const {

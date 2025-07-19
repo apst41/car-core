@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import Packages from "../entity/Packages"; // adjust the path as needed
-import Banner from "../entity/Banner";
-import UserVehicle from "../entity/UserVehicle";
-import CarModel from "../entity/CarModel";
-import PriceMapper from "../entity/PriceMapper";
-import Manufacturer from "../entity/Manufacturer";
-import Services from "../entity/Services";
+import Packages from "../../entity/apps/Packages"; // adjust the path as needed
+import Banner from "../../entity/apps/Banner";
+import UserVehicle from "../../entity/apps/UserVehicle";
+import CarModel from "../../entity/apps/CarModel";
+import PriceMapper from "../../entity/apps/PriceMapper";
+import Manufacturer from "../../entity/apps/Manufacturer";
+import Services from "../../entity/apps/Services";
 
 export const getAllPackages = async (req: Request, res: Response): Promise<any> => {
     try {

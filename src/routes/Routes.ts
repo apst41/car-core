@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import {healthCheck} from "../controller/Controller";
-import {verifyotp, register, logout} from "../controller/Auth";
-import {getCities} from "../controller/CitiesController";
-import {getUserDetails} from "../controller/UserDetails";
+import {healthCheck} from "../controller/apis/Controller";
+import {verifyotp, register, logout} from "../controller/apis/Auth";
+import {getCities} from "../controller/apis/CitiesController";
+import {getUserDetails} from "../controller/apis/UserDetails";
 import {authenticateToken} from "../controller/middleware/AuthMiddleware";
 import {
     addAddress,
@@ -10,20 +10,20 @@ import {
     getUserAddresses,
     updateAddress,
     updateSelection
-} from "../controller/AddressController";
-import {getAllPackages, getPopularServices, getPackageById, getHomeBanner} from "../controller/PackagesController";
-import {generateSlots, getAvailableSlots} from "../controller/SlotController";
+} from "../controller/apis/AddressController";
+import {getAllPackages, getPopularServices, getPackageById, getHomeBanner} from "../controller/apis/PackagesController";
+import {generateSlots, getAvailableSlots} from "../controller/apis/SlotController";
 import {
     addVehicle, deleteUserVehicle,
     getUserVehicleById,
     getUserVehicles,
     updateVehicleSelection
-} from "../controller/UserVehicleController";
-import {addBackendVehicle, getAllVehicles} from "../controller/VehicleController";
-import {cancelBooking, createBooking, getAllBookings, rescheduleBooking} from "../controller/BookingController";
-import {getCarModel} from "../controller/CarModelService";
-import {getPrice} from "../controller/PriceMapperService";
-import {getFeedback, getFeedbackById, saveFeedback} from "../controller/FeedBackService";
+} from "../controller/apis/UserVehicleController";
+import {addBackendVehicle, getAllVehicles} from "../controller/apis/VehicleController";
+import {cancelBooking, createBooking, getAllBookings, rescheduleBooking} from "../controller/apis/BookingController";
+import {getCarModel} from "../controller/apis/CarModelService";
+import {getPrice} from "../controller/apis/PriceMapperService";
+import {getFeedback, getFeedbackById, saveFeedback} from "../controller/apis/FeedBackService";
 
 const router = Router();
 

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import UserVehicle from "../entity/UserVehicle";
-import Manufacturer from "../entity/Manufacturer";
-import CarModel from "../entity/CarModel"; // Adjust the path as needed
+import UserVehicle from "../../entity/apps/UserVehicle";
+import Manufacturer from "../../entity/apps/Manufacturer";
+import CarModel from "../../entity/apps/CarModel"; // Adjust the path as needed
 
 export const addVehicle = async (req: Request, res: Response): Promise<any> => {
     const userId = (req as any).user?.id;

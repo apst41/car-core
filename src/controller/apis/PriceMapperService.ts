@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import PriceMapper from "../entity/PriceMapper"; // adjust path as needed
+import PriceMapper from "../../entity/apps/PriceMapper"; // adjust path as needed
 
 export const getPrice = async (req: Request, res: Response): Promise<any> => {
     const { packageId, carModelId } = req.query;

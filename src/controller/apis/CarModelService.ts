@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import CarModel from "../entity/CarModel";
+import CarModel from "../../entity/apps/CarModel";
 
 export const getCarModel = async (req: Request, res: Response): Promise<any> => {
 

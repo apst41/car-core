@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Cities from "../entity/Cities";
+import Cities from "../../entity/apps/Cities";
 export const getCities = async (req: Request, res: Response): Promise<any> => {
 
     try {

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Manufacturer from "../entity/Manufacturer";  // Import your Manufacturer model
+import Manufacturer from "../../entity/apps/Manufacturer";  // Import your Manufacturer model
 
 export const addBackendVehicle = async (req: Request, res: Response): Promise<any> => {
     const { manufacturer, model, type, manufacturerImage, modelImage } = req.body;

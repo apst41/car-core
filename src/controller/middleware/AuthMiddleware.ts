@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import User from "../../entity/User";
+import User from "../../entity/apps/User";
 import NodeCache from "node-cache";
 
 export const myCache = new NodeCache();
