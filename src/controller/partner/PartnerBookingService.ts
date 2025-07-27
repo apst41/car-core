@@ -1,15 +1,40 @@
 import {Request, Response} from "express";
+import { Op} from "sequelize";
 
 
 import Booking from "../../entity/apps/Booking";
 import {getCachedAddressById, getPackagePartnerById, getUser} from "../middleware/PartnerCache";
+import UserVehicle from "../../entity/apps/UserVehicle";
+import CarModel from "../../entity/apps/CarModel";
+import Slot from "../../entity/apps/Slot";
+import Feedback from "../../entity/apps/Feedback";
 
 export const getPaginatedBookings = async (options: any) => {
     const page = options.page || 1;
     const limit = options.limit || 10;
     const offset = (page - 1) * limit;
+    const status = options.status;
+    const date = options.date; // e.g. "2025-07-24"
 
-    const {rows, count} = await Booking.findAndCountAll({
+    const where: any = {};
+
+    if (status) {
+        where.status = status;
+    }
+
+    if (date) {
+        const selectedDate = new Date(date);
+        const nextDate = new Date(selectedDate);
+        nextDate.setDate(selectedDate.getDate() + 1);
+
+        where.createdAt = {
+            [Op.gte]: selectedDate,
+            [Op.lt]: nextDate,
+        };
+    }
+
+    const { rows, count } = await Booking.findAndCountAll({
+        where,
         limit,
         offset,
         order: [["createdAt", "DESC"]],
@@ -27,8 +52,11 @@ export const fetchBookings = async (req: Request, res: Response): Promise<any> =
     try {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
+        const status = req.query.status as string | undefined;
+        const date  = req.query.date as string;
 
-        const data = await getPaginatedBookings({ page, limit });
+        // Pass status to getPaginatedBookings if present
+        const data = await getPaginatedBookings({ page, limit, status,date });
         const bookings = data.bookings;
 
         const response = await Promise.all(
@@ -38,13 +66,35 @@ export const fetchBookings = async (req: Request, res: Response): Promise<any> =
                 const address = await getCachedAddressById(jsonBooking.addressId);
                 const pkg = await getPackagePartnerById(jsonBooking.packageId);
                 const user = await getUser(booking.userId);
+                const userVehicle = await UserVehicle.findByPk(booking.userVehicleId, {
+                    attributes: ['carModelId'],
+                });
+
+                const slotData = await Slot.findByPk(booking.slotId, {
+                    attributes: { exclude: ['createdAt', 'updatedAt'] },
+                });
+
+                const feedback = await Feedback.findOne({ where: { bookingId: booking.id } });
+
+
+                let carData = null;
+                if (userVehicle?.carModelId) {
+                    carData = await CarModel.findByPk(userVehicle.carModelId, {
+                        attributes: { exclude: ['createdAt', 'updatedAt','modelImage'] },
+                    });
+                }
+
+
 
                 return {
                     booking: {
                         ...jsonBooking,
                         address,
                         package: pkg,
-                        user
+                        user,
+                        carDetail: carData,
+                        slotDetail: slotData,
+                        feedbackDetail:feedback
                     }
                 };
             })
@@ -61,6 +111,35 @@ export const fetchBookings = async (req: Request, res: Response): Promise<any> =
         });
     } catch (error) {
         console.error("Error fetching bookings:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+
+export const updateBookingStatus = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const bookingId = req.params.id;
+        const { status } = req.body;
+
+        if (!status) {
+            return res.status(400).json({ message: 'Status is required' });
+        }
+
+        const booking = await Booking.findByPk(bookingId);
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        booking.status = status;
+        await booking.save();
+
+        return res.status(200).json({
+            message: "Booking status updated successfully",
+            data: booking
+        });
+    } catch (error) {
+        console.error("Error updating booking status:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };

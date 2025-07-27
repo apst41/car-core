@@ -5,7 +5,7 @@ class UserVehicle extends Model {
     public id!: number;
     public userId!: number;
     public carModelId!: number;
-   public manufacturerId!:number;
+    public manufacturerId!:number;
     public isSelected!: boolean;
 }
 
