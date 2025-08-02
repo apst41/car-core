@@ -56,6 +56,12 @@ export const getPaginatedBookings = async (options: any) => {
 
 export const fetchBookings = async (req: Request, res: Response): Promise<any> => {
     try {
+        // Get partner user from middleware
+        const partnerUser = (req as any).partnerUser;
+        if (!partnerUser) {
+            return res.status(401).json({ message: 'Partner not authenticated' });
+        }
+
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
         const status = req.query.status as string | undefined;
@@ -135,6 +141,12 @@ export const fetchBookings = async (req: Request, res: Response): Promise<any> =
 
 export const updateBookingStatus = async (req: Request, res: Response): Promise<any> => {
     try {
+        // Get partner user from middleware
+        const partnerUser = (req as any).partnerUser;
+        if (!partnerUser) {
+            return res.status(401).json({ message: 'Partner not authenticated' });
+        }
+
         const bookingId = req.params.id;
         const { status } = req.body;
 
@@ -163,6 +175,12 @@ export const updateBookingStatus = async (req: Request, res: Response): Promise<
 
 export const fetchBookingsById = async (req: Request, res: Response): Promise<any> => {
     try {
+        // Get partner user from middleware
+        const partnerUser = (req as any).partnerUser;
+        if (!partnerUser) {
+            return res.status(401).json({ message: 'Partner not authenticated' });
+        }
+
         const bookingId = req.params.id
 
         if (!bookingId) {

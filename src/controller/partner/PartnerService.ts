@@ -4,11 +4,10 @@ import PartnerUser from "../../entity/partner/PartnerUser";
 import jwt from "jsonwebtoken";
 
 
-// Partner-specific JWT secret - completely independent from main app
 const PARTNER_JWT_SECRET = process.env.PARTNER_JWT_SECRET || "partner_secret_key_2024";
 
 export const loginInUser = async (req: Request, res: Response): Promise<any> => {
-    const {userName, password } = req.body;
+    const { userName, password } = req.body;
 
     if (!userName || !password) {
         return res.status(400).json({ message: "Username and password are required" });
@@ -34,12 +33,33 @@ export const loginInUser = async (req: Request, res: Response): Promise<any> => 
         }
 
         const token = jwt.sign(
-            { id: user.id, email: user.email },
+            {id: user.id, email: user.email},
             PARTNER_JWT_SECRET,
-            { expiresIn: "1d" }
+            {expiresIn: "1d"}
         );
 
-       await user.update({token: token});
+
+        // ✅ Update token using the user instance directly
+        try {
+            await user.update({ token: token });
+            console.log("✅ Token update successful");
+        } catch (updateError) {
+            console.error("❌ Token update failed:", updateError);
+            throw updateError;
+        }
+        
+        // Verify the update worked
+        console.log("🔍 Updated user token:", user.token);
+        
+        // Force reload from database to ensure we have the latest data
+        try {
+            await user.reload();
+            console.log("🔄 User reloaded successfully");
+            console.log("🔍 Final user token:", user.token);
+        } catch (reloadError) {
+            console.error("❌ User reload failed:", reloadError);
+            throw reloadError;
+        }
 
         return res.status(200).json({
             message: "Login successful",
@@ -47,16 +67,15 @@ export const loginInUser = async (req: Request, res: Response): Promise<any> => 
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                token: token,
+                token: user.token,
                 isActive: user.isActive,
             },
         });
     } catch (error) {
-        console.error("Login error:", error);
+        console.error("❌ Login error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
-
 
 
 
