@@ -12,6 +12,23 @@ import {calculatePrice} from "./PackagesController";
 import Manufacturer from "../../entity/apps/Manufacturer";
 import CarModel from "../../entity/apps/CarModel";
 
+// Function to generate booking ID with format: BK + timestamp + random characters (sortable by time)
+const generateBookingId = (): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const timestamp = Date.now().toString(36); // Convert timestamp to base36 for shorter representation
+    
+    // Take only the last 3 characters of timestamp to leave more space for random chars
+    const timestampPart = timestamp.slice(-3);
+    let result = 'BK' + timestampPart;
+    
+    // Add random characters to reach exactly 8 characters (3 random chars)
+    const remainingLength = 8 - result.length;
+    for (let i = 0; i < remainingLength; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+};
+
 export const createBooking = async (req: Request, res: Response): Promise<any> => {
     const {
         userVehicleId,
@@ -83,9 +100,13 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
         const price = calculatePrice(priceMapper.price, packages.discount)
 
 
+        // Generate unique booking ID
+        const bookingId = generateBookingId();
+        
         // Now, create the booking entry
         const booking = await Booking.create(
             {
+                id: bookingId,
                 userId,
                 userVehicleId,
                 addressId,
@@ -276,9 +297,13 @@ export const rescheduleBooking = async (req: Request, res: Response): Promise<an
 
         const price = calculatePrice(priceMapper.price, packages.discount);
 
+        // Generate unique booking ID for rescheduled booking
+        const newBookingId = generateBookingId();
+
         // Create new booking
         const newBooking = await Booking.create(
             {
+                id: newBookingId,
                 userId,
                 userVehicleId,
                 addressId,

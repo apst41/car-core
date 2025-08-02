@@ -2,7 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "./Database";
 
 class Booking extends Model {
-    public id!: number;
+    public id!: string;
     public userId!: number;
     public status!: string;
     public notes?: string;
@@ -21,10 +21,9 @@ class Booking extends Model {
 Booking.init(
     {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
             primaryKey: true,
-            autoIncrement: true,
         },
         userId: {
             type: DataTypes.INTEGER,

@@ -1,6 +1,7 @@
 import {Router} from 'express';
-import {loginInUser, signUpUser} from "../controller/partner/PartnerService";
+import {loginInUser, signUpUser, logoutUser} from "../controller/partner/PartnerService";
 import {fetchBookings, fetchBookingsById, updateBookingStatus} from "../controller/partner/PartnerBookingService";
+import {authenticatePartnerToken} from "../middleware/PartnerAuthMiddleware";
 
 
 const partnerRouter = Router();
@@ -10,11 +11,13 @@ partnerRouter.post('/signup', signUpUser)
 
 partnerRouter.post('/login', loginInUser);
 
-partnerRouter.get("/booking", fetchBookings)
+partnerRouter.post('/logout', authenticatePartnerToken, logoutUser);
 
-partnerRouter.put('/booking/:id/status', updateBookingStatus);
+partnerRouter.get("/booking", authenticatePartnerToken, fetchBookings)
 
-partnerRouter.get('/booking/:id',fetchBookingsById)
+partnerRouter.put('/booking/:id/status', authenticatePartnerToken, updateBookingStatus);
+
+partnerRouter.get('/booking/:id', authenticatePartnerToken, fetchBookingsById)
 
 
 export default partnerRouter;

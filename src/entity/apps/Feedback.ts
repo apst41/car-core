@@ -4,7 +4,7 @@ import sequelize from "./Database";
 class Feedback extends Model {
     public id!: number;
     public userId!: number;
-    public bookingId!: number;
+    public bookingId!: string;
     public rating!: number;
     public comment?: string;
 }
@@ -29,7 +29,7 @@ Feedback.init(
             },
         },
         bookingId:{
-          type: DataTypes.INTEGER,
+          type: DataTypes.STRING,
           allowNull: false,
         },
         comment: {

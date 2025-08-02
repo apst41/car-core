@@ -4,7 +4,8 @@ import PartnerUser from "../../entity/partner/PartnerUser";
 import jwt from "jsonwebtoken";
 
 
-const JWT_SECRET = process.env.JWT_SECRET || "zu3H$4eNf@Xv9!Pw2kA#8BtY^Lc6QrWz";
+// Partner-specific JWT secret - completely independent from main app
+const PARTNER_JWT_SECRET = process.env.PARTNER_JWT_SECRET || "partner_secret_key_2024";
 
 export const loginInUser = async (req: Request, res: Response): Promise<any> => {
     const {userName, password } = req.body;
@@ -34,7 +35,7 @@ export const loginInUser = async (req: Request, res: Response): Promise<any> => 
 
         const token = jwt.sign(
             { id: user.id, email: user.email },
-            JWT_SECRET,
+            PARTNER_JWT_SECRET,
             { expiresIn: "1d" }
         );
 
@@ -96,5 +97,26 @@ export const signUpUser = async (req: Request, res: Response): Promise<any> => {
     } catch (error) {
         console.error("Signup error:", error);
         return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const logoutUser = async (req: Request, res: Response): Promise<any> => {
+    try {
+        // Partner user is already authenticated by middleware, so we can access it from req.partnerUser
+        const partnerUser = (req as any).partnerUser;
+
+        if (!partnerUser) {
+            return res.status(401).json({ message: 'Partner not authenticated' });
+        }
+
+        // Clear the token from the database
+        await partnerUser.update({
+            token: null,
+        });
+
+        return res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        console.error("Logout error:", error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 };
