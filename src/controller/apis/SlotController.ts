@@ -5,18 +5,43 @@ import moment from 'moment';
 
 export const getAvailableSlots = async (req: Request, res: Response): Promise<any> => {
     try {
+        // Get current date and time for comparison with explicit timezone handling
+        const now = moment();
+        const currentDate = now.format('YYYY-MM-DD');
+        const currentTime = now.format('HH:mm:ss');
+        // Use a more robust approach with datetime comparison
         const slots = await Slot.findAll({
-            attributes: ['id', 'date', 'time'],
+            attributes: ['id', 'date', 'time', 'slotCount'],
             where: {
                 slotCount: {
                     [Op.gt]: 0,
                 },
                 [Op.and]: [
-                    literal(`CAST(CONCAT(date, ' ', time) AS DATETIME) >= NOW()`)
-                ],
+                    literal(`CONCAT(date, ' ', time) >= '${currentDate} ${currentTime}'`)
+                ]
             },
             order: [['date', 'ASC'], ['time', 'ASC']],
         });
+
+
+        // Log first few slots for debugging
+        if (slots.length > 0) {
+            console.log('🔍 First 3 slots:', slots.slice(0, 3).map(s => `${s.date} ${s.time} (count: ${s.slotCount})`));
+            
+            // Additional debugging: Check if any slots are in the past
+            const now = moment();
+            const pastSlots = slots.filter(slot => {
+                const slotDateTime = moment(`${slot.date} ${slot.time}`, 'YYYY-MM-DD HH:mm:ss');
+                return slotDateTime.isBefore(now);
+            });
+            
+            if (pastSlots.length > 0) {
+                console.log('⚠️  WARNING: Found past slots that should be filtered out:');
+                pastSlots.slice(0, 5).forEach(slot => {
+                    console.log(`   - ${slot.date} ${slot.time} (count: ${slot.slotCount})`);
+                });
+            }
+        }
 
         const groupedMap = new Map<string, { id: number; time: string }[]>();
 
