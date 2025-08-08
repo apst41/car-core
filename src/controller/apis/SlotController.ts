@@ -32,27 +32,17 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<an
             order: [['date', 'ASC'], ['time', 'ASC']],
         });
 
-        // Debugging info
-        if (slots.length > 0) {
-            console.log('🔍 First 3 slots:', slots.slice(0, 3).map(s => `${s.date} ${s.time} (count: ${s.slotCount})`));
-            const pastSlots = slots.filter(slot =>
-                moment(`${slot.date} ${slot.time}`, 'YYYY-MM-DD HH:mm:ss').isBefore(now)
-            );
-            if (pastSlots.length > 0) {
-                console.log('⚠️ WARNING: Found past slots that should be filtered out:');
-                pastSlots.slice(0, 5).forEach(slot => {
-                    console.log(`   - ${slot.date} ${slot.time} (count: ${slot.slotCount})`);
-                });
-            }
-        }
-
         const groupedMap = new Map<string, { id: number; time: string }[]>();
 
         slots.forEach(slot => {
             const date = slot.date;
             const startTime = moment(slot.time, 'HH:mm:ss');
-            const endTime = startTime.clone().add(1, 'hour'); // Create range like 5PM-6PM
-            const formattedTimeRange = `${startTime.format('h:mm A')}-${endTime.format('h:mm A')}`;
+            const endTime = startTime.clone().add(1, 'hour');
+
+            // Format without ":00"
+            const cleanStart = startTime.format('h:mm A').replace(':00', '');
+            const cleanEnd = endTime.format('h:mm A').replace(':00', '');
+            const formattedTimeRange = `${cleanStart}-${cleanEnd}`;
 
             const timeslotItem = {
                 id: slot.id,
@@ -78,7 +68,6 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<an
         return res.status(500).json({ message: "Internal server error" });
     }
 };
-
 
 
 
