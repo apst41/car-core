@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {healthCheck} from "../controller/apis/Controller";
-import {verifyotp, register, logout} from "../controller/apis/Auth";
+import {verifyOtp, registerOrSendOtp, logout} from "../controller/apis/Auth";
 import {getCities} from "../controller/apis/CitiesController";
 import {getUserDetails} from "../controller/apis/UserDetails";
 import {authenticateToken} from "../controller/middleware/AuthMiddleware";
@@ -28,8 +28,8 @@ import {getFeedback, getFeedbackById, saveFeedback} from "../controller/apis/Fee
 const router = Router();
 
 router.get('/', healthCheck);
-router.post('/auth/send-otp',register)
-router.post('/auth/verify-otp', verifyotp);
+router.post('/auth/send-otp',registerOrSendOtp)
+router.post('/auth/verify-otp', verifyOtp);
 router.get('/cities', getCities);
 router.get('/user',authenticateToken,getUserDetails)
 router.post("/addAddress",authenticateToken,addAddress)

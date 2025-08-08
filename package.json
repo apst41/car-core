@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/Server.js",
+    "debug": "node --inspect dist/Server.js",
     "dev": "concurrently \"tsc --watch\" \"node dist/Server.js\"",
     "build": "tsc"
   },
@@ -15,6 +16,7 @@
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.7",
+    "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "class-validator": "^0.14.1",

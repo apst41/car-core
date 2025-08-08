@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import User from "../../entity/apps/User";
-import jwt from 'jsonwebtoken';
 import {myCache} from "../middleware/AuthMiddleware";
+import otpService from "./OTPController";
+import jwt from "jsonwebtoken";
 
-export const register = async (req: Request, res: Response): Promise<any> => {
+export const registerOrSendOtp = async (req: Request, res: Response): Promise<any> => {
     const { name, username, email, password, mobileNo } = req.body;
 
     if (!mobileNo) {
@@ -12,7 +13,23 @@ export const register = async (req: Request, res: Response): Promise<any> => {
     }
 
     try {
-        // Check if user already exists by email, username, or mobileNo
+        let user = await User.findOne({ where: { mobileNo } });
+
+        // ✅ If user already exists, just send OTP
+        if (user) {
+            const sendResult = await otpService.sendOTP(mobileNo);
+
+            if (!sendResult.success) {
+                return res.status(500).json({ message: 'Failed to send OTP' });
+            }
+
+            return res.status(200).json({
+                message: 'OTP sent successfully',
+                requestId: sendResult.requestId
+            });
+        }
+
+        // ✅ If user does not exist, check for duplicate email & username
         if (email) {
             const existingUser = await User.findOne({ where: { email } });
             if (existingUser) {
@@ -27,192 +44,112 @@ export const register = async (req: Request, res: Response): Promise<any> => {
             }
         }
 
-        const user = await User.findOne({ where: { mobileNo } });
-        if (user?.mobileNo) {
-            const otpCode = getOtp();
-            const otpExpiry = new Date(Date.now() + 1000 * 60 * 10); // OTP expires in 10 minutes
-        
-       
-        await user.update({
-            otpCode: otpCode,
-            otpExpiry: otpExpiry
-        });
-
-         //send otp in future
-
-        return res.status(200).json({ message: 'OTP sent successfully' });
-        }
-       
-
-
-        // Hash password
+        // ✅ Hash password if provided
         let hashedPassword = null;
         if (password) {
             hashedPassword = await bcrypt.hash(password, 10);
         }
 
-        // Hardcoded OTP
-        const otp = "123456"; // Hardcoded OTP for simplicity
-        const otpExpiry = new Date(Date.now() + 1000 * 60 * 1000); // OTP expires in 10 minutes
-
-        // Create new user
-        await User.create({
+        // ✅ Create new user
+        user = await User.create({
             name,
             username,
             email,
-            passwordHash: hashedPassword, // Can be null if password is not provided
-            mobileNo, // Include mobileNo in the user creation
-            otpCode: otp,
-            otpExpiry,
+            passwordHash: hashedPassword,
+            mobileNo
         });
 
-        // Send OTP email (using hardcoded OTP)
-        // await transporter.sendMail({
-        //     from: process.env.EMAIL_USER, // sender address
-        //     to: email, // recipient address
-        //     subject: "Your OTP Code",
-        //     text: `Your OTP code is ${otp}. It will expire in 10 minutes.`,
-        // });
+        // ✅ Send OTP to the new user
+        const sendResult = await otpService.sendOTP(mobileNo);
 
-        return res.status(200).json({ message: "Registration successful. OTP sent to your email." });
+        if (!sendResult.success) {
+            return res.status(500).json({ message: 'User registered but failed to send OTP' });
+        }
+
+        return res.status(200).json({
+            message: 'User registered & OTP sent successfully',
+            requestId: sendResult.requestId
+        });
+
     } catch (error) {
-        console.error(error);
+        console.error("Register/Send OTP Error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
 
-// export const verifyOtp = async (req: Request, res: Response): Promise<any> => {
-//     const { email, otp }: { email: string, otp: string } = req.body;
 
-//     try {
-//         // Check if the user exists by email
-//         const user = await User.findOne({ where: { email } });
 
-//         if (!user) {
-//             return res.status(400).json({ message: 'User not found' });
-//         }
+export const verifyOtp = async (req: Request, res: Response): Promise<any> => {
+    const { requestId, otpCode } = req.body;
+    const isNonProd = process.env.PROFILE !== "prod";
 
-//         // Check if OTP exists and is correct
-//         if (user.otpCode !== otp) {
-//             return res.status(400).json({ message: 'Invalid OTP' });
-//         }
-
-//         // Check if OTP has expired
-//         const now = new Date();
-//         if (user.otpExpiry && user.otpExpiry < now) {
-//             return res.status(400).json({ message: 'OTP has expired' });
-//         }
-
-//         // OTP is valid and not expired, proceed with your logic (e.g., update user status, etc.)
-//         // Optionally, clear OTP from the database after successful verification
-//         user.otpCode = null;
-//         user.otpExpiry = null;
-//         user.isVerified = true;
-//         await user.save();
-
-//         return res.status(200).json({ message: 'OTP verified successfully' });
-//     } catch (error) {
-//         console.error(error);
-//         return res.status(500).json({ message: 'Internal server error' });
-//     }
-// };
-
-export const sendOtp = async (req: Request, res: Response): Promise<any> => {
-    const { mobileNo }: { mobileNo: string} = req.body;
-
+    if (isNonProd) {
+        console.log("🔍 [VERIFY OTP] Incoming request:", { requestId, otpCode });
+    }
 
     try {
-        // Find the user by email or username (you can modify this to support both)
-        const user = await User.findOne({
-            where: {
-                mobileNo: mobileNo // Search by mobile number
-            }
-        });
+        // 1️⃣ Find user by requestId
+        const user = await User.findOne({ where: { requestId } });
 
         if (!user) {
-            return res.status(400).json({ message: 'Mobile No does not exists' });
-        }
-
-        // Generate a random 6-digit OTP
-        const otpCode = getOtp();
-        const otpExpiry = new Date(Date.now() + 1000 * 60 * 10); // OTP expires in 10 minutes
-        
-        // Update the user's OTP code and expiry time
-        await user.update({
-            otpCode: otpCode,
-            otpExpiry: otpExpiry
-        });
-        
-        // Send the OTP to the user's mobile number (using hardcoded OTP)
-        // await sendOtpToMobile(otpCode, mobileNo);
-        
-        return res.status(200).json({ message: 'OTP sent successfully' });
-       
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
-    }
-};
-
-
-
-export const verifyotp = async (req: Request, res: Response): Promise<any> => {
-    const { mobileNo, otpCode }: { mobileNo: string; otpCode: string } = req.body;
-
-
-    try {
-        // Find the user by email or username (you can modify this to support both)
-        const user = await User.findOne({
-            where: {
-                mobileNo: mobileNo // Search by mobile number
+            if (isNonProd) {
+                console.warn(`⚠️ [VERIFY OTP] No user found for requestId: ${requestId}`);
             }
-        });
-
-        if (!user || user.otpCode !== otpCode) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ success: false, message: "Invalid requestId" });
         }
 
-        const currentTime = new Date();
-        if (user.otpExpiry && currentTime > user.otpExpiry) {
-         return res.status(400).json({ message: "OTP has expired" });
+        // 2️⃣ Check if OTP matches
+        if (user.otpCode !== otpCode) {
+            if (isNonProd) {
+                console.warn(`⚠️ [VERIFY OTP] OTP mismatch for requestId: ${requestId}. Expected: ${user.otpCode}, Got: ${otpCode}`);
+            }
+            return res.status(400).json({ success: false, message: "Invalid OTP" });
         }
 
-        // Compare entered password with the stored hash
-       
+        // 3️⃣ Check if OTP is expired
+        if (!user.otpExpiry || user.otpExpiry < new Date()) {
+            if (isNonProd) {
+                console.warn(`⏳ [VERIFY OTP] OTP expired for requestId: ${requestId}. Expiry: ${user.otpExpiry}`);
+            }
+            return res.status(400).json({ success: false, message: "OTP expired" });
+        }
 
-       
-
-        // Create a JWT token (you can adjust the payload as needed)
+        // Generate JWT token valid for 70 days
         const token = jwt.sign(
-            { mobileNO: user.mobileNo },
-            process.env.JWT_SECRET || 'your_secret_key', // Use a secret key for signing the token
-            { expiresIn: '1000h' } // Token expiry time (e.g., 1 hour)
+            { mobileNo: user.mobileNo },
+            process.env.JWT_SECRET || "default_secret",
+            { expiresIn: "70d" }
         );
 
+        const tokenExpiry = new Date(Date.now() + 70 * 24 * 60 * 60 * 1000); // 70 days in ms
 
+        // 4️⃣ Update user: verified + clear OTP + set token + tokenExpiry + clear requestId
         await user.update({
+            isVerified: true,
             otpCode: null,
             otpExpiry: null,
-            token: token, // Save the token in the database
-            tokenExpiry: new Date(Date.now() + 1000 * 60 * 60) // Set token expiry time (e.g., 1 hour)
+            requestId: null,
+            token: token,
+            tokenExpiry: tokenExpiry,
         });
 
-        // Send the response with the token
+        if (isNonProd) {
+            console.log(`✅ [VERIFY OTP] User verified successfully. User ID: ${user.id}`);
+        }
+
+        // 5️⃣ Return success response with token and user id
         return res.status(200).json({
-            message: 'Login successful',
+            success: true,
+            message: "Login successful",
             token: token,
-            user_id: user.id
+            user_id: user.id,
         });
+
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
+        console.error("❌ [VERIFY OTP] Error:", error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
-
-function getOtp() {
-    return "123456";
-    //return Math.floor(100000 + Math.random() * 900000).toString();
-}
 
 
  export const fetchTokenDetails = async (req: Request, res: Response): Promise<any> => {

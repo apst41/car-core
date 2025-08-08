@@ -11,7 +11,7 @@ const sequelize = new Sequelize(
         host: process.env.DB_HOST || "localhost",
         port: 3306,
         dialect: "mysql",
-        logging: false, // optional: remove SQL logs
+        logging: true, // optional: remove SQL logs
     }
 );
 
@@ -20,10 +20,9 @@ const sequelize = new Sequelize(
         await sequelize.authenticate();
         console.log("✅ Database connected successfully!");
 
-        // Only create tables if they don't exist
-        // This will NOT try to re-add indexes every time
-        await sequelize.sync();
-        console.log("✅ Models synced successfully!");
+        // Alter tables to match models without re-creating indexes
+        await sequelize.sync({ alter: { drop: false } });
+        console.log("✅ Models synced (altered) successfully!");
     } catch (error) {
         console.error("❌ Failed to connect or sync models:", error);
     }

@@ -13,6 +13,7 @@ class User extends Model {
     public isVerified?: boolean;
     public token?: string | null;
     public tokenExpiry?: Date | null;
+    public requestId?: string | null;
 }
 
 User.init(
@@ -64,6 +65,11 @@ User.init(
         },
         tokenExpiry: {
             type: DataTypes.DATE,
+            allowNull: true,
+            defaultValue: null,
+        },
+        requestId: {
+            type: DataTypes.STRING,
             allowNull: true,
             defaultValue: null,
         },
