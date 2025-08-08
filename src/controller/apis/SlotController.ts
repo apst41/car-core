@@ -5,11 +5,13 @@ import moment from 'moment';
 
 export const getAvailableSlots = async (req: Request, res: Response): Promise<any> => {
     try {
-        // Get current date and time for comparison with explicit timezone handling
         const now = moment();
         const currentDate = now.format('YYYY-MM-DD');
         const currentTime = now.format('HH:mm:ss');
-        // Use a more robust approach with datetime comparison
+
+        // Calculate date 7 days from now
+        const sevenDaysLater = now.clone().add(7, 'days').format('YYYY-MM-DD');
+
         const slots = await Slot.findAll({
             attributes: ['id', 'date', 'time', 'slotCount'],
             where: {
@@ -17,26 +19,27 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<an
                     [Op.gt]: 0,
                 },
                 [Op.and]: [
-                    literal(`CONCAT(date, ' ', time) >= '${currentDate} ${currentTime}'`)
+                    // Only fetch future slots (date + time >= now)
+                    literal(`CONCAT(date, ' ', time) >= '${currentDate} ${currentTime}'`),
+                    // Limit to next 7 days
+                    {
+                        date: {
+                            [Op.lte]: sevenDaysLater
+                        }
+                    }
                 ]
             },
             order: [['date', 'ASC'], ['time', 'ASC']],
         });
 
-
-        // Log first few slots for debugging
+        // Debugging info
         if (slots.length > 0) {
             console.log('🔍 First 3 slots:', slots.slice(0, 3).map(s => `${s.date} ${s.time} (count: ${s.slotCount})`));
-            
-            // Additional debugging: Check if any slots are in the past
-            const now = moment();
-            const pastSlots = slots.filter(slot => {
-                const slotDateTime = moment(`${slot.date} ${slot.time}`, 'YYYY-MM-DD HH:mm:ss');
-                return slotDateTime.isBefore(now);
-            });
-            
+            const pastSlots = slots.filter(slot =>
+                moment(`${slot.date} ${slot.time}`, 'YYYY-MM-DD HH:mm:ss').isBefore(now)
+            );
             if (pastSlots.length > 0) {
-                console.log('⚠️  WARNING: Found past slots that should be filtered out:');
+                console.log('⚠️ WARNING: Found past slots that should be filtered out:');
                 pastSlots.slice(0, 5).forEach(slot => {
                     console.log(`   - ${slot.date} ${slot.time} (count: ${slot.slotCount})`);
                 });
@@ -47,11 +50,13 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<an
 
         slots.forEach(slot => {
             const date = slot.date;
-            const formattedTime = moment(slot.time, 'HH:mm:ss').format('h:mm A');
+            const startTime = moment(slot.time, 'HH:mm:ss');
+            const endTime = startTime.clone().add(1, 'hour'); // Create range like 5PM-6PM
+            const formattedTimeRange = `${startTime.format('h:mm A')}-${endTime.format('h:mm A')}`;
 
             const timeslotItem = {
                 id: slot.id,
-                time: formattedTime,
+                time: formattedTimeRange,
             };
 
             if (!groupedMap.has(date)) {
@@ -73,6 +78,9 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<an
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
+
+
 
 export const generateSlots = async (req: Request, res: Response): Promise<any> => {
     try {
