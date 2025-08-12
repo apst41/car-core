@@ -92,7 +92,8 @@ class OTPService {
 
     private async sendSMS(mobile: string, otp: string): Promise<any> {
         try {
-            const url = `${this.config.baseUrl}/${this.config.apiKey}/SMS/${mobile}/${otp}/OTP1`;
+            const url = `${this.config.baseUrl}/${this.config.apiKey}/SMS/${mobile}/${otp}/Logins
+            `;
             const { data } = await axios.get(url, {
                 headers: { Authorization: `Bearer ${process.env.AUTH_TOKEN || ""}` }
             });
