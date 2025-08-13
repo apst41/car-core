@@ -5,6 +5,7 @@ import {myCache} from "../middleware/AuthMiddleware";
 import otpService from "./OTPController";
 import jwt from "jsonwebtoken";
 
+
 export const registerOrSendOtp = async (req: Request, res: Response): Promise<any> => {
     const { name, username, email, password, mobileNo } = req.body;
 
@@ -12,31 +13,71 @@ export const registerOrSendOtp = async (req: Request, res: Response): Promise<an
         return res.status(400).json({ message: "Mobile number is required" });
     }
 
+    // 📌 Static OTP config
+    const staticOtpNumbers: number[] = [
+        7017658313,
+        9999999999,
+        8920115341,
+        9899741739,
+        9958630516
+    ];
+    const STATIC_OTP = "123456";
+
     try {
         let user = await User.findOne({ where: { mobileNo } });
 
-        // ✅ If user already exists, just send OTP
-        if (user) {
-            const sendResult = await otpService.sendOTP(mobileNo);
+        // 🔹 Static OTP path
+        if (staticOtpNumbers.includes(Number(mobileNo))) {
+            const staticRequestId = `STATIC-${Date.now()}`;
 
-            if (!sendResult.success) {
-                return res.status(500).json({ message: 'Failed to send OTP' });
+            if (!user) {
+                // Create static OTP user
+                const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+                user = await User.create({
+                    name,
+                    username,
+                    email,
+                    passwordHash: hashedPassword,
+                    mobileNo,
+                    otpCode: STATIC_OTP,
+                    otpExpiry: new Date(Date.now() + 5 * 60 * 1000),
+                    requestId: staticRequestId
+                });
+            } else {
+                // Update existing user with static OTP
+                await user.update({
+                    otpCode: STATIC_OTP,
+                    otpExpiry: new Date(Date.now() + 5 * 60 * 1000),
+                    requestId: staticRequestId
+                });
             }
 
             return res.status(200).json({
-                message: 'OTP sent successfully',
+                message: "Static OTP set successfully",
+                requestId: staticRequestId,
+                otp: STATIC_OTP // ⚠ Remove in production
+            });
+        }
+
+        // 🔹 Normal flow: user exists → just send OTP
+        if (user) {
+            const sendResult = await otpService.sendOTP(mobileNo);
+            if (!sendResult.success) {
+                return res.status(500).json({ message: "Failed to send OTP" });
+            }
+            return res.status(200).json({
+                message: "OTP sent successfully",
                 requestId: sendResult.requestId
             });
         }
 
-        // ✅ If user does not exist, check for duplicate email & username
+        // 🔹 New user creation checks
         if (email) {
             const existingUser = await User.findOne({ where: { email } });
             if (existingUser) {
                 return res.status(400).json({ message: "Email already in use" });
             }
         }
-
         if (username) {
             const existingUsername = await User.findOne({ where: { username } });
             if (existingUsername) {
@@ -44,13 +85,9 @@ export const registerOrSendOtp = async (req: Request, res: Response): Promise<an
             }
         }
 
-        // ✅ Hash password if provided
-        let hashedPassword = null;
-        if (password) {
-            hashedPassword = await bcrypt.hash(password, 10);
-        }
+        const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
 
-        // ✅ Create new user
+        // Create user (normal flow)
         user = await User.create({
             name,
             username,
@@ -59,15 +96,14 @@ export const registerOrSendOtp = async (req: Request, res: Response): Promise<an
             mobileNo
         });
 
-        // ✅ Send OTP to the new user
+        // Send OTP (normal flow, handled inside sendOTP)
         const sendResult = await otpService.sendOTP(mobileNo);
-
         if (!sendResult.success) {
-            return res.status(500).json({ message: 'User registered but failed to send OTP' });
+            return res.status(500).json({ message: "User registered but failed to send OTP" });
         }
 
         return res.status(200).json({
-            message: 'User registered & OTP sent successfully',
+            message: "User registered & OTP sent successfully",
             requestId: sendResult.requestId
         });
 
@@ -76,7 +112,6 @@ export const registerOrSendOtp = async (req: Request, res: Response): Promise<an
         return res.status(500).json({ message: "Internal server error" });
     }
 };
-
 
 
 export const verifyOtp = async (req: Request, res: Response): Promise<any> => {
