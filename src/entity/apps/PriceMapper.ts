@@ -6,6 +6,7 @@ class PriceMapper extends Model {
     public packageId!: string;
     public carModelId!: number;
     public price!: number;
+    public cityId!: number;
 }
 
 PriceMapper.init(
@@ -27,6 +28,10 @@ PriceMapper.init(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+        cityId:{
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        }
     },
     {
         sequelize,

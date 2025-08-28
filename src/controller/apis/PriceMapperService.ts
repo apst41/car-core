@@ -3,9 +3,10 @@ import PriceMapper from "../../entity/apps/PriceMapper"; // adjust path as neede
 
 export const getPrice = async (req: Request, res: Response): Promise<any> => {
     const { packageId, carModelId } = req.query;
+    const cityId = req.headers["cityid"];
 
-    if (!packageId || !carModelId) {
-        return res.status(400).json({ message: "Missing packageId or carModelId" });
+    if (!packageId || !carModelId || !cityId) {
+        return res.status(400).json({ message: "Missing packageId, carModelId, or cityId" });
     }
 
     try {
@@ -13,11 +14,12 @@ export const getPrice = async (req: Request, res: Response): Promise<any> => {
             where: {
                 packageId: packageId as string,
                 carModelId: Number(carModelId),
+                cityId: Number(cityId), // 👈 include cityId in condition
             },
         });
 
         if (!priceEntry) {
-            return res.status(404).json({ message: "Price not found for given package and car model" });
+            return res.status(404).json({ message: "Price not found for given package, car model, and city" });
         }
 
         return res.status(200).json({ price: priceEntry.price });

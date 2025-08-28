@@ -28,14 +28,17 @@ export const getPackageById = async (req: Request, res: Response): Promise<any> 
         const packages = await Packages.findByPk(req.params.id);
         const userVehicle = await UserVehicle.findByPk(req.params.userVehicle);
 
-        if (!packages || !userVehicle) {
-            return res.status(200).json({ message: "Packages or Vehicle not found" });
+        const cityId = req.headers["cityid"];
+
+        if (!packages || !userVehicle || !cityId) {
+            return res.status(200).json({ message: "Packages or Vehicle or cityId not found" });
         }
 
         const priceMapper = await PriceMapper.findOne({
             where: {
                 packageId: req.params.id,
                 carModelId: userVehicle.carModelId,
+                cityId: cityId,
             }
         });
 
