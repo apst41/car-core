@@ -8,6 +8,7 @@ class UserAddress extends Model {
     public tag?: string;
     public addressText!: string;
     public city!: string;
+    public cityId!: number;
     public pincode!: string;
 public isSelected?: boolean;
 }
@@ -39,6 +40,10 @@ UserAddress.init(
             allowNull: false,
         },
         pincode: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        cityId: {
             type: DataTypes.STRING,
             allowNull: false,
         },

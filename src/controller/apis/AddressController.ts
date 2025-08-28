@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
 import UserAddress from "../../entity/apps/UserAddress";
+import Cities from "../../entity/apps/Cities";
 
 // Add Address
 export const addAddress = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { latitude, longitude, tag, addressText, city, pincode, isSelected } = req.body;
+        const { latitude, longitude, tag, addressText, city, cityId,pincode, isSelected } = req.body;
 
         const userId = (req as any).user.id;
 
-        if (!userId || !addressText || !city || !pincode) {
-            return res.status(400).json({ message: "userId, addressText, city, and pincode are required" });
+        if (!userId || !addressText || !city || !pincode || !cityId) {
+            return res.status(400).json({ message: "userId, addressText, city, cityId and pincode are required" });
         }
 
         // If isSelected is true, set all previous addresses to false
@@ -20,6 +21,8 @@ export const addAddress = async (req: Request, res: Response): Promise<any> => {
             );
         }
 
+        const dbCity = await Cities.findOne({ where: { userId } });
+
         const address = await UserAddress.create({
             userId,
             latitude,
@@ -27,6 +30,7 @@ export const addAddress = async (req: Request, res: Response): Promise<any> => {
             tag,
             addressText,
             city,
+            cityId: cityId,
             pincode,
             isSelected: isSelected === true // ensure it's stored correctly
         });
