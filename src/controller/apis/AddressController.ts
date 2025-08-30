@@ -21,8 +21,6 @@ export const addAddress = async (req: Request, res: Response): Promise<any> => {
             );
         }
 
-        const dbCity = await Cities.findOne({ where: { userId } });
-
         const address = await UserAddress.create({
             userId,
             latitude,
@@ -30,7 +28,7 @@ export const addAddress = async (req: Request, res: Response): Promise<any> => {
             tag,
             addressText,
             city,
-            cityId: cityId,
+            cityId:cityId,
             pincode,
             isSelected: isSelected === true // ensure it's stored correctly
         });
