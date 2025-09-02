@@ -17,6 +17,55 @@ interface TokenResponse {
     token_type: string;
 }
 
+interface PaymentRequest {
+    merchantOrderId: string;
+    amount: number;
+    expireAfter: number;
+    metaInfo: {
+        udf1?: string;
+        udf2?: string;
+        udf3?: string;
+        udf4?: string;
+        udf5?: string;
+    };
+    paymentFlow: {
+        type: string;
+        message: string;
+        merchantUrls: {
+            redirectUrl: string;
+        };
+    };
+}
+
+interface PaymentResponse {
+    orderId: string;
+    state: string;
+    expireAt: number;
+    redirectUrl: string;
+}
+
+interface PaymentStatusResponse {
+    orderId: string;
+    state: string;
+    amount: number;
+    expireAt: number;
+    metaInfo: {
+        udf1?: string;
+        udf2?: string;
+        udf3?: string;
+        udf4?: string;
+        udf5?: string;
+    };
+    paymentDetails: Array<{
+        paymentMode: string;
+        transactionId: string;
+        timestamp: number;
+        amount: number;
+        state: string;
+    }>;
+}
+
+
 class PhonePeService {
     private config: PhonePeConfig;
 
@@ -74,6 +123,53 @@ class PhonePeService {
             return data as TokenResponse;
         } catch (error: any) {
             console.error("Error fetching PhonePe token:", error?.response?.data || error.message || error);
+            return null;
+        }
+    }
+
+    async createPayment(paymentData: PaymentRequest, accessToken: string): Promise<PaymentResponse | null> {
+        try {
+            const { data } = await axios.post(
+                `${this.config.baseUrl}/apis/pg-sandbox/checkout/v2/pay`,
+                paymentData,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `O-Bearer ${accessToken}`
+                    }
+                }
+            );
+
+            if (process.env.NODE_ENV === "development") {
+                console.log("✅ PhonePe Payment Response:", data);
+            }
+
+            return data as PaymentResponse;
+        } catch (error: any) {
+            console.error("Error creating PhonePe payment:", error?.response?.data || error.message || error);
+            return null;
+        }
+    }
+
+    async getPaymentStatus(merchantOrderId: string, accessToken: string): Promise<PaymentStatusResponse | null> {
+        try {
+            const { data } = await axios.get(
+                `${this.config.baseUrl}/apis/pg-sandbox/checkout/v2/order/${merchantOrderId}/status`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `O-Bearer ${accessToken}`
+                    }
+                }
+            );
+
+            if (process.env.NODE_ENV === "development") {
+                console.log("✅ PhonePe Payment Status Response:", data);
+            }
+
+            return data as PaymentStatusResponse;
+        } catch (error: any) {
+            console.error("Error fetching PhonePe payment status:", error?.response?.data || error.message || error);
             return null;
         }
     }
