@@ -10,7 +10,8 @@ class UserAddress extends Model {
     public city!: string;
     public cityId!: number;
     public pincode!: string;
-public isSelected?: boolean;
+    public isSelected?: boolean;
+    public isDeleted?: boolean; // Added new field
 }
 
 UserAddress.init(
@@ -51,6 +52,11 @@ UserAddress.init(
             type: DataTypes.BOOLEAN,
             allowNull: true,
             defaultValue: false,
+        },
+        isDeleted: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false, // This will be false by default for all records
         },
     },
     {

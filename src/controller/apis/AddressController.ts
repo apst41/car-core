@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import UserAddress from "../../entity/apps/UserAddress";
 import Cities from "../../entity/apps/Cities";
+import {Op} from "sequelize";
 
 // Add Address
 export const addAddress = async (req: Request, res: Response): Promise<any> => {
@@ -44,16 +45,25 @@ export const addAddress = async (req: Request, res: Response): Promise<any> => {
 // Delete Address
 export const deleteAddress = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { addressId } = req.params; // Get Address ID from path
+        const { addressId } = req.params;
 
         if (!addressId) {
             return res.status(400).json({ message: "Address ID is required" });
         }
 
-        const deleted = await UserAddress.destroy({ where: { id: addressId } });
+        // Soft delete: Update isDeleted to true
+        const [updatedRows] = await UserAddress.update(
+            { isDeleted: true },
+            {
+                where: {
+                    id: addressId,
+                    isDeleted: { [Op.or]: [false, null] } // Handle both false and null values
+                }
+            }
+        );
 
-        if (!deleted) {
-            return res.status(200).json({ message: "Address not found" });
+        if (updatedRows === 0) {
+            return res.status(404).json({ message: "Address not found or already deleted" });
         }
 
         return res.status(200).json({ message: "Address deleted successfully" });
@@ -62,6 +72,7 @@ export const deleteAddress = async (req: Request, res: Response): Promise<any> =
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 // Update Address
 export const updateAddress = async (req: Request, res: Response): Promise<any> => {
