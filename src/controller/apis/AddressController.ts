@@ -135,8 +135,13 @@ export const getUserAddresses = async (req: Request, res: Response): Promise<any
         if (!userId) {
             return res.status(400).json({ message: "userId is required" });
         }
-        // Fetch all addresses for the user
-        const addresses = await UserAddress.findAll({ where: { userId } });
+
+        // Fetch all addresses for the user, ordered by isSelected descending (true first)
+        const addresses = await UserAddress.findAll({
+            where: { userId },
+            order: [['isSelected', 'DESC']] // This will put true values first
+        });
+
         return res.status(200).json(addresses);
     } catch (error) {
         console.error("Error fetching user addresses:", error);
