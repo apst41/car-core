@@ -69,6 +69,23 @@ export const getPackageById = async (req: Request, res: Response): Promise<any> 
             .map(service => service?.imageUrl)
             .filter((url): url is string => !!url);
 
+// ... existing code ...
+        // Build price object with all computed values
+        const rawPrice = Number(priceMapper.price);
+        const discountPercent = Number((priceMapper as any).discount ?? 0);
+        const discountAmount =  (rawPrice * (discountPercent / 100))// percentage stored in PriceMapper
+        const finalAmount = rawPrice - discountAmount;
+        const basePrice = +(finalAmount / 1.18).toFixed(2);
+        const taxAmount = +(finalAmount - basePrice).toFixed(2);
+
+        const price = {
+            price:rawPrice,
+            discountAmount:discountAmount,
+            basePrice,
+            taxAmount,
+            finalAmount
+        };
+
         return res.status(200).json({
             packages: {
                 packageId: packages.id,
@@ -78,18 +95,17 @@ export const getPackageById = async (req: Request, res: Response): Promise<any> 
                 description: packages.description,
 
             },
-            price: priceMapper.price,
-            discountedPrice: calculatePrice(priceMapper.price, packages.discount),
-            durationMinutes:packages.durationMinutes,
+            price,
+            durationMinutes: packages.durationMinutes,
             banner_images,
             serviceInclusions: servicesOrdered,
         });
+// ... existing code ...
     } catch (error) {
         console.error("getPackageById error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
-
 
 export const getHomeBanner = async (req: Request, res: Response): Promise<any> => {
     try {

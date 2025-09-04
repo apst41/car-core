@@ -7,6 +7,7 @@ class PriceMapper extends Model {
     public carModelId!: number;
     public price!: number;
     public cityId!: number;
+    public discount!: number; // newly added
 }
 
 PriceMapper.init(
@@ -31,6 +32,11 @@ PriceMapper.init(
         cityId:{
             type: DataTypes.INTEGER,
             allowNull: false,
+        },
+        discount: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false,
+            defaultValue: 0.0,
         }
     },
     {

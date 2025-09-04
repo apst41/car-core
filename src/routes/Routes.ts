@@ -60,7 +60,7 @@ router.put("/booking",authenticateToken,rescheduleBooking)
 router.post("/feedback",authenticateToken,saveFeedback)
 router.get("/feedback",authenticateToken,getFeedback)
 router.get("/feedback/:id",authenticateToken,getFeedbackById)
-
+// router.get("/app/version/", checkAppVersion);
 // Payment routes
 router.post("/payment/create", authenticateToken, createPayment);
 router.get("/payment/status/:merchantOrderId", authenticateToken, getPaymentStatus);
