@@ -4,13 +4,11 @@ import sequelize from "./Database";
 class AppVersion extends Model {
     public id!: number;
     public platform!: string; // "android" | "ios"
-    public appVersion!: string; // version for querying (e.g., "2.3")
-    public latestVersion!: string;
-    public minSupportedVersion!: string;
+    public latestVersion!: any; // JSON
+    public forceUpdateVersion!: any; // JSON
+    public optionalVersion!: any; // JSON
     public updateUrl!: string;
-    public forceUpdateMessage!: string;
-    public optionalUpdateMessage!: string;
-    public status!: string; // "ok", "optional_update", "force_update"
+    public status!: "ok" | "optional_update" | "force_update";
     public isActive!: boolean;
 }
 
@@ -25,36 +23,38 @@ AppVersion.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
-        appVersion: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
         latestVersion: {
-            type: DataTypes.STRING,
+            type: DataTypes.JSON, // ✅ JSON column
             allowNull: false,
+            defaultValue: {
+                version: "1.0.0",
+                message: "You are on the latest version.",
+            },
         },
-        minSupportedVersion: {
-            type: DataTypes.STRING,
-            allowNull: false,
+        optionalVersion: {
+            type: DataTypes.JSON, // ✅ JSON column
+            allowNull: true,
+            defaultValue: {
+                version: [],
+                message: "A new version is available. Update now for latest features.",
+            },
+        },
+        forceUpdateVersion: {
+            type: DataTypes.JSON, // ✅ JSON column
+            allowNull: true,
+            defaultValue: {
+                version: [],
+                message: "A new version is available. Please update to continue.",
+            },
         },
         updateUrl: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        forceUpdateMessage: {
-            type: DataTypes.TEXT,
-            allowNull: false,
-            defaultValue: "A new version is available. Please update to continue.",
-        },
-        optionalUpdateMessage: {
-            type: DataTypes.TEXT,
-            allowNull: false,
-            defaultValue: "A new version is available. Update now for the latest features.",
-        },
         status: {
             type: DataTypes.ENUM("ok", "optional_update", "force_update"),
             allowNull: false,
-            defaultValue: "force_update",
+            defaultValue: "ok",
         },
         isActive: {
             type: DataTypes.BOOLEAN,
@@ -69,9 +69,9 @@ AppVersion.init(
         indexes: [
             {
                 unique: true,
-                fields: ['platform', 'appVersion']
-            }
-        ]
+                fields: ["platform"],
+            },
+        ],
     }
 );
 

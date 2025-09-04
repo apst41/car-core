@@ -25,6 +25,7 @@ import {getCarModel} from "../controller/apis/CarModelService";
 import {getPrice} from "../controller/apis/PriceMapperService";
 import {getFeedback, getFeedbackById, saveFeedback} from "../controller/apis/FeedBackService";
 import {createPayment, getPaymentStatus, getPaymentDetails, getUserPayments} from "../controller/apis/PaymentController";
+import {checkAppVersion} from "../controller/apis/AppVersionController";
 
 const router = Router();
 
@@ -60,7 +61,7 @@ router.put("/booking",authenticateToken,rescheduleBooking)
 router.post("/feedback",authenticateToken,saveFeedback)
 router.get("/feedback",authenticateToken,getFeedback)
 router.get("/feedback/:id",authenticateToken,getFeedbackById)
-// router.get("/app/version/", checkAppVersion);
+ router.get("/app/version/", checkAppVersion);
 // Payment routes
 router.post("/payment/create", authenticateToken, createPayment);
 router.get("/payment/status/:merchantOrderId", authenticateToken, getPaymentStatus);
