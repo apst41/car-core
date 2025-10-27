@@ -1,4 +1,5 @@
 import axios from "axios";
+import qs from "qs";
 
 interface PhonePeConfig {
     clientId: string;
@@ -65,7 +66,6 @@ interface PaymentStatusResponse {
     }>;
 }
 
-
 class PhonePeService {
     private config: PhonePeConfig;
 
@@ -106,21 +106,42 @@ class PhonePeService {
 
     async getToken(): Promise<TokenResponse | null> {
         try {
-            const params = new URLSearchParams();
-            params.append("client_id", this.config.clientId);
-            params.append("client_secret", this.config.clientSecret);
-            params.append("client_version", this.config.clientVersion);
-            params.append("grant_type", "client_credentials");
-
-            const { data } = await axios.post(`${this.config.baseUrl}/oauth/token`, params, {
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            const body = qs.stringify({
+                client_id: this.config.clientId,
+                client_secret: this.config.clientSecret,
+                client_version: this.config.clientVersion.toString(),
+                grant_type: "client_credentials",
             });
+
+            const url = `${this.config.baseUrl}/apis/pg-sandbox/v1/oauth/token`;
+
+            // Always print curl (you can wrap with NODE_ENV check if needed)
+            const curlCmd = `
+            curl --location '${url}' \\
+            --header 'Content-Type: application/x-www-form-urlencoded' \\
+            --data-urlencode 'client_id=${this.config.clientId}' \\
+            --data-urlencode 'client_secret=${this.config.clientSecret}' \\
+            --data-urlencode 'client_version=${this.config.clientVersion}' \\
+            --data-urlencode 'grant_type=client_credentials'
+                `.trim();
+
+            console.log("📎 Equivalent curl command:\n", curlCmd, "\n");
+
+            const { data } = await axios.post<TokenResponse>(
+                url,
+                body,
+                {
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                }
+            );
 
             if (process.env.NODE_ENV === "development") {
                 console.log("✅ PhonePe Token Response:", data);
             }
 
-            return data as TokenResponse;
+            return data;
         } catch (error: any) {
             console.error("Error fetching PhonePe token:", error?.response?.data || error.message || error);
             return null;

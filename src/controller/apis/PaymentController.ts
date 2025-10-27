@@ -32,10 +32,10 @@ export const createPayment = async (req: AuthenticatedRequest, res: Response): P
         } = req.body;
 
         // Validate required fields
-        if (!merchantOrderId || !amount || !redirectUrl) {
+        if (!merchantOrderId || !amount || !redirectUrl || !bookingId) {
             res.status(400).json({
                 success: false,
-                message: "Missing required fields: merchantOrderId, amount, redirectUrl"
+                message: "Missing required fields: merchantOrderId, amount, redirectUrl,bookingId"
             });
             return;
         }
