@@ -1,3 +1,6 @@
 node_modules
 .idea
 *.js
+# Environment files
+.env
+dist/.env

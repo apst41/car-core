@@ -6,7 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/Server.js",
-    "debug": "node --inspect dist/Server.js",
     "dev": "concurrently \"tsc --watch\" \"node dist/Server.js\"",
     "build": "tsc"
   },
@@ -16,11 +15,8 @@
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.7",
-    "axios": "^1.11.0",
-    "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "class-validator": "^0.14.1",
-    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
@@ -33,8 +29,6 @@
     "typeorm": "^0.3.20"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
     "@types/pg": "^8.11.10",
