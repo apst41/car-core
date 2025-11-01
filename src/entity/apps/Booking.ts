@@ -12,9 +12,9 @@ class Booking extends Model {
     public packageId!: number;
     public slotId!: number;
 
-    public price!: number;
+    // Now JSON instead of number
+    public price!: Record<string, any>;
     public discount!: number;
-    public finalAmount!: number;
     public city!: string;
 }
 
@@ -30,7 +30,13 @@ Booking.init(
             allowNull: false,
         },
         status: {
-            type: DataTypes.ENUM("PENDING", "CONFIRMED", "CANCELLED", "COMPLETED","RESCHEDULED"),
+            type: DataTypes.ENUM(
+                "PENDING",
+                "CONFIRMED",
+                "CANCELLED",
+                "COMPLETED",
+                "RESCHEDULED"
+            ),
             defaultValue: "PENDING",
         },
         notes: {
@@ -53,18 +59,15 @@ Booking.init(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+        // ✅ Store as JSON
         price: {
-            type: DataTypes.FLOAT,
+            type: DataTypes.JSON,
             allowNull: false,
         },
         discount: {
             type: DataTypes.FLOAT,
             allowNull: false,
             defaultValue: 0,
-        },
-        finalAmount: {
-            type: DataTypes.FLOAT,
-            allowNull: false,
         },
         city: {
             type: DataTypes.STRING,

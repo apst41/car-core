@@ -11,6 +11,7 @@ import PriceMapper from "../../entity/apps/PriceMapper";
 import {calculatePrice} from "./PackagesController";
 import Manufacturer from "../../entity/apps/Manufacturer";
 import CarModel from "../../entity/apps/CarModel";
+import {sendResendEmail} from "./EmailService";
 
 // Function to generate booking ID with format: BK + timestamp + random characters (sortable by time)
 const generateBookingId = (): string => {
@@ -32,6 +33,7 @@ const generateBookingId = (): string => {
 export const createBooking = async (req: Request, res: Response): Promise<any> => {
     const {
         userVehicleId,
+        price,
         addressId,
         packageId,
         slotId,
@@ -97,7 +99,7 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
             return res.status(200).json({ message: "Invalid packageId" });
         }
 
-        const price = calculatePrice(priceMapper.price, packages.discount)
+       //    const price = calculatePrice(priceMapper.price, packages.discount)
 
 
         // Generate unique booking ID
@@ -112,8 +114,8 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
                 addressId,
                 packageId,
                 slotId,
-                price: priceMapper.price,
-                discount: priceMapper.price-price,
+                price: price,
+                discount: price.discountAmount,
                 finalAmount: price,
                 status:"PENDING",
                 notes: notes || "",
@@ -124,6 +126,12 @@ export const createBooking = async (req: Request, res: Response): Promise<any> =
 
         // Commit the transaction
         await transaction.commit();
+
+        const emailBody = JSON.stringify(booking, null, 2);
+
+        sendResendEmail(emailBody).catch(err => {
+            console.error("Failed to send booking email:", err);
+        });
 
         return res.status(201).json({
             message: "Booking created successfully",

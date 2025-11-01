@@ -72,7 +72,7 @@ export const getPackageById = async (req: Request, res: Response): Promise<any> 
 // ... existing code ...
         // Build price object with all computed values
         const rawPrice = Number(priceMapper.price);
-        const discountPercent = Number((priceMapper as any).discount ?? 0);
+        const discountPercent = Number((packages as any).discount ?? 0);
         const discountAmount =  (rawPrice * (discountPercent / 100))// percentage stored in PriceMapper
         const finalAmount = rawPrice - discountAmount;
         const basePrice = +(finalAmount / 1.18).toFixed(2);
