@@ -7,7 +7,7 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<an
     try {
         const now = moment();
         const currentDate = now.format('YYYY-MM-DD');
-        const currentTime = now.format('HH:mm:ss');
+        const currentTime = now.add(1, 'hour').format('HH:mm:ss');
 
         // Calculate date 7 days from now
         const sevenDaysLater = now.clone().add(7, 'days').format('YYYY-MM-DD');
