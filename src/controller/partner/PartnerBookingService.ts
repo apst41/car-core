@@ -36,7 +36,7 @@ export const getPaginatedBookings = async (options: any) => {
 
         const slots = await Slot.findAll({
             where: {
-                slotDate: {
+                date: {
                     [Op.gte]: selectedDate,
                     [Op.lt]: nextDate,
                 },
