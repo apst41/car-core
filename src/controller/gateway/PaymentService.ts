@@ -7,16 +7,6 @@ interface PaymentRequest {
     userId: number;
     bookingId?: string;
     expireAfter?: number;
-    metaInfo?: {
-        udf1?: string;
-        udf2?: string;
-        udf3?: string;
-        udf4?: string;
-        udf5?: string;
-    };
-    redirectUrl: string;
-    callbackUrl?: string;
-    message?: string;
 }
 
 interface PaymentResult {
@@ -91,9 +81,6 @@ class PaymentService {
                 amount: paymentData.amount,
                 currency: "INR",
                 status: "PENDING",
-                redirectUrl: paymentData.redirectUrl,
-                callbackUrl: paymentData.callbackUrl,
-                metaInfo: paymentData.metaInfo || {},
                 expireAt: new Date(Date.now() + (paymentData.expireAfter || 1200) * 1000)
             });
 
@@ -101,13 +88,8 @@ class PaymentService {
                 merchantOrderId: paymentData.merchantOrderId,
                 amount: paymentData.amount,
                 expireAfter: paymentData.expireAfter || 1200, // Default 20 minutes
-                metaInfo: paymentData.metaInfo || {},
                 paymentFlow: {
                     type: "PG_CHECKOUT",
-                    message: paymentData.message || "Payment for your order",
-                    merchantUrls: {
-                        redirectUrl: paymentData.redirectUrl
-                    }
                 }
             };
 

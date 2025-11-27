@@ -22,19 +22,9 @@ interface PaymentRequest {
     merchantOrderId: string;
     amount: number;
     expireAfter: number;
-    metaInfo: {
-        udf1?: string;
-        udf2?: string;
-        udf3?: string;
-        udf4?: string;
-        udf5?: string;
-    };
+
     paymentFlow: {
         type: string;
-        message: string;
-        merchantUrls: {
-            redirectUrl: string;
-        };
     };
 }
 

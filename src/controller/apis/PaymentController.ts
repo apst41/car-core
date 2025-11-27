@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import paymentService from '../gateway/PaymentService';
 import phonePeService from '../gateway/PhonePayService';
+import {randomBytes} from "node:crypto";
 
 interface AuthenticatedRequest extends Request {
     user?: {
@@ -8,6 +9,12 @@ interface AuthenticatedRequest extends Request {
         [key: string]: any;
     };
 }
+
+export const generateMerchantOrderId = (): string => {
+    // Example: ORD-<random-10-chars>
+    const random = randomBytes(5).toString("hex");
+    return `ORD-${Date.now()}-${random}`;
+};
 
 export const createPayment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
@@ -20,19 +27,17 @@ export const createPayment = async (req: AuthenticatedRequest, res: Response): P
             return;
         }
 
+        const  merchantOrderId = generateMerchantOrderId();
+
+        const expireAfter = 1800
+
         const {
-            merchantOrderId,
             amount,
             bookingId,
-            expireAfter,
-            metaInfo,
-            redirectUrl,
-            callbackUrl,
-            message
         } = req.body;
 
         // Validate required fields
-        if (!merchantOrderId || !amount || !redirectUrl || !bookingId) {
+        if (!merchantOrderId || !amount || !bookingId) {
             res.status(400).json({
                 success: false,
                 message: "Missing required fields: merchantOrderId, amount, redirectUrl,bookingId"
@@ -63,11 +68,7 @@ export const createPayment = async (req: AuthenticatedRequest, res: Response): P
             amount,
             userId,
             bookingId,
-            expireAfter,
-            metaInfo,
-            redirectUrl,
-            callbackUrl,
-            message
+            expireAfter
         };
 
         const result = await paymentService.createPayment(paymentData);
