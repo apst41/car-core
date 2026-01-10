@@ -24,7 +24,13 @@ import {cancelBooking, createBooking, getAllBookings, rescheduleBooking} from ".
 import {getCarModel} from "../controller/apis/CarModelService";
 import {getPrice} from "../controller/apis/PriceMapperService";
 import {getFeedback, getFeedbackById, saveFeedback} from "../controller/apis/FeedBackService";
-import {createPayment, getPaymentStatus, getPaymentDetails, getUserPayments} from "../controller/apis/PaymentController";
+import {
+    createPayment,
+    getPaymentStatus,
+    getPaymentDetails,
+    getUserPayments,
+    getToken, createPhonePeSdkOrder
+} from "../controller/apis/PaymentController";
 import {checkAppVersion} from "../controller/apis/AppVersionController";
 
 const router = Router();
@@ -67,5 +73,6 @@ router.post("/payment/create", authenticateToken, createPayment);
 router.get("/payment/status/:merchantOrderId", authenticateToken, getPaymentStatus);
 router.get("/payment/details/:merchantOrderId", authenticateToken, getPaymentDetails);
 router.get("/payment/user", authenticateToken, getUserPayments);
-
+router.get("/payment/token",authenticateToken,getToken)
+router.post("/sdk/payment/order",authenticateToken,createPhonePeSdkOrder)
 export default router;

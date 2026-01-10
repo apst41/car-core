@@ -6,6 +6,7 @@ interface PhonePeConfig {
     clientSecret: string;
     clientVersion: string;
     baseUrl: string;
+    tokenUrl:string
 }
 
 interface TokenResponse {
@@ -33,6 +34,7 @@ interface PaymentResponse {
     state: string;
     expireAt: number;
     redirectUrl: string;
+    token: string;
 }
 
 interface PaymentStatusResponse {
@@ -56,6 +58,33 @@ interface PaymentStatusResponse {
     }>;
 }
 
+
+interface MetaInfo {
+    udf1?: string;
+    udf2?: string;
+    udf3?: string;
+    udf4?: string;
+    udf5?: string;
+    udf6?: string;
+    udf7?: string;
+    udf8?: string;
+    udf9?: string;
+    udf10?: string;
+    udf11?: string;
+    udf12?: string;
+    udf13?: string;
+    udf14?: string;
+    udf15?: string;
+}
+
+interface PaymentResponse {
+    orderId: string;
+    state: string;
+    expireAt: number;
+    redirectUrl: string;
+}
+
+
 class PhonePeService {
     private config: PhonePeConfig;
 
@@ -64,7 +93,8 @@ class PhonePeService {
         if (!process.env.PHONEPE_CLIENT_ID ||
             !process.env.PHONEPE_CLIENT_SECRET ||
             !process.env.PHONEPE_CLIENT_VERSION ||
-            !process.env.PHONEPE_API_URL) {
+            !process.env.PHONEPE_API_URL ||
+            !process.env.TOKEN_URL) {
             throw new Error("PhonePe configuration missing in .env file");
         }
 
@@ -73,10 +103,12 @@ class PhonePeService {
             clientSecret: process.env.PHONEPE_CLIENT_SECRET,
             clientVersion: process.env.PHONEPE_CLIENT_VERSION,
             baseUrl: process.env.PHONEPE_API_URL,
+            tokenUrl: process.env.TOKEN_URL
+
         };
 
         // Axios logging for development
-        if (process.env.NODE_ENV === "development") {
+        if (process.env.NODE_ENV === "prod") {
             axios.interceptors.request.use(req => {
                 console.log(`📤 [AXIOS] ${req.method?.toUpperCase()} ${req.url}`);
                 if (req.data) console.log("   Data:", req.data);
@@ -103,7 +135,7 @@ class PhonePeService {
                 grant_type: "client_credentials",
             });
 
-            const url = `${this.config.baseUrl}/apis/pg-sandbox/v1/oauth/token`;
+            const url = `${this.config.baseUrl}` +  `${this.config.tokenUrl}`;
 
             // Always print curl (you can wrap with NODE_ENV check if needed)
             const curlCmd = `
@@ -141,7 +173,7 @@ class PhonePeService {
     async createPayment(paymentData: PaymentRequest, accessToken: string): Promise<PaymentResponse | null> {
         try {
             const { data } = await axios.post(
-                `${this.config.baseUrl}/apis/pg-sandbox/checkout/v2/pay`,
+                `${this.config.baseUrl}/pg/checkout/v2/pay`,
                 paymentData,
                 {
                     headers: {
@@ -165,7 +197,7 @@ class PhonePeService {
     async getPaymentStatus(merchantOrderId: string, accessToken: string): Promise<PaymentStatusResponse | null> {
         try {
             const { data } = await axios.get(
-                `${this.config.baseUrl}/apis/pg-sandbox/checkout/v2/order/${merchantOrderId}/status`,
+                `${this.config.baseUrl}/pg/checkout/v2/order/${merchantOrderId}/status`,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -184,7 +216,47 @@ class PhonePeService {
             return null;
         }
     }
+
+    async createSdkOrder(
+        paymentData: PaymentRequest,
+        accessToken: string
+    ): Promise<PaymentResponse | null> {
+        try {
+            const url = `${this.config.baseUrl}/pg/checkout/v2/sdk/order`;
+
+            const { data } = await axios.post(
+                url,
+                {
+                    merchantOrderId: paymentData.merchantOrderId,
+                    amount: paymentData.amount,
+                    paymentFlow: {
+                        type: "PG_CHECKOUT",
+                    },
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `O-Bearer ${accessToken}`,
+                    },
+                }
+            );
+
+            if (process.env.NODE_ENV === "development") {
+                console.log("✅ PhonePe SDK Order Response:", data);
+            }
+
+            return data as PaymentResponse;
+        } catch (error: any) {
+            console.error(
+                "❌ Error creating PhonePe SDK order:",
+                error?.response?.data || error.message || error
+            );
+            return null;
+        }
+    }
+
 }
+
 
 // Export instance
 const phonePeService = new PhonePeService();

@@ -3,6 +3,8 @@ import paymentService from '../gateway/PaymentService';
 import phonePeService from '../gateway/PhonePayService';
 import {randomBytes} from "node:crypto";
 
+import PhonePeOrder from "../../entity/apps/PhonePeOrder";
+
 interface AuthenticatedRequest extends Request {
     user?: {
         id: number;
@@ -274,3 +276,119 @@ export const getUserPayments = async (req: AuthenticatedRequest, res: Response):
         });
     }
 };
+
+export const getToken = async (
+    req: AuthenticatedRequest,
+    res: Response
+): Promise<void> => {
+
+    const token = await phonePeService.getToken();
+
+    if (!token) {
+        res.status(500).json({ message: "Unable to fetch token" });
+        return;
+    }
+
+    res.status(200).json(token);
+};
+
+
+
+export const createPhonePeSdkOrder = async (
+    req: AuthenticatedRequest,
+    res: Response
+): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            res.status(401).json({
+                success: false,
+                message: "User not authenticated",
+            });
+            return;
+        }
+
+        const { amount} = req.body;
+
+        if (!amount) {
+            res.status(400).json({
+                success: false,
+                message: "amount and expireAfter are required",
+            });
+            return;
+        }
+
+        // 1️⃣ Generate merchantOrderId at runtime
+        const merchantOrderId = generateMerchantOrderId();
+
+        // 🔒 Hardcode expireAt (milliseconds)
+        const expireAfter = Date.now() + 12 * 1000;
+
+        // 2️⃣ Save initial order in DB
+        const order = await PhonePeOrder.create({
+            merchantOrderId,
+            amount,
+            expireAfter,          // ✅ hardcoded here
+            state: "CREATED",
+        });
+
+        // 3️⃣ Generate PhonePe access token
+        const token = await phonePeService.getToken();
+        if (!token) {
+            res.status(500).json({
+                success: false,
+                message: "Failed to generate PhonePe token",
+            });
+            return;
+        }
+
+        // 4️⃣ Create PhonePe SDK Order
+        const sdkOrder = await phonePeService.createSdkOrder(
+            {
+                merchantOrderId,
+                amount,
+                expireAfter,
+                paymentFlow: {
+                    type: "PG_CHECKOUT",
+                },
+            },
+            token.access_token
+        );
+
+        if (!sdkOrder) {
+            res.status(500).json({
+                success: false,
+                message: "Failed to create PhonePe SDK order",
+            });
+            return;
+        }
+
+        // 5️⃣ Update DB (DO NOT override expireAt)
+        await order.update({
+            orderId: sdkOrder.orderId,
+            redirectUrl: sdkOrder.redirectUrl,
+            state: sdkOrder.state,
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "PhonePe SDK order created successfully",
+            data: {
+                merchantOrderId,
+                phonePeOrderId: sdkOrder.orderId,
+                redirectUrl: sdkOrder.redirectUrl,
+                expireAfter,          // ✅ hardcoded value returned
+                state: sdkOrder.state,
+                token:sdkOrder.token
+            },
+        });
+    } catch (error: any) {
+        console.error("❌ PaymentController: Error creating PhonePe SDK order:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+};
+
